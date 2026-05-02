@@ -28,22 +28,36 @@ cargo run --release --bin inspect_listing -- https://www.goutos.gr/en-US/propert
 
 Walk every listing in a goutos.gr area, rank them by the **latest CDN photo
 upload date** (which the goutos.gr listing HTML doesn't expose directly — see
-below), and write a printable catalog to `html/<area>-recent.html` and
-`pdf/<area>-recent.pdf`.
+below) or by **price ascending**, and write a printable catalog to
+`html/<area>-<sort>.html` and `pdf/<area>-<sort>.pdf`.
 
 ```
-cargo run --release --bin recent_listings                       # default: Ermioni (area 3235), all pages
-cargo run --release --bin recent_listings -- --area 3237        # Portocheli
-cargo run --release --bin recent_listings -- --top 20           # only render the 20 most recent
+cargo run --release --bin recent_listings                          # Ermioni, latest-photo first
+cargo run --release --bin recent_listings -- --sort price-asc      # Ermioni, cheapest first
+cargo run --release --bin recent_listings -- --area 3237           # Portocheli
+cargo run --release --bin recent_listings -- --top 20              # only render top 20
 ```
 
-Defaults to all pages of the area's "newer" sort (currently 11 pages / ~190
+Sort options:
+
+- `--sort latest` (default): newest photo upload first.
+- `--sort price-asc`: cheapest first; "Price upon request" entries sort
+  last. Note that some agents post `1 €` as a placeholder for "ask for
+  price" on rentals — those will appear at the very top.
+
+Defaults to all pages of the area's listings (currently 11 pages / 190
 listings for Ermioni). PDF rendering uses headless Chrome via `--print-to-pdf`;
-override the binary path with `CHROME=/path/to/chrome` if it isn't at the
-default `/Applications/Google Chrome.app/...`.
+override the binary path with `CHROME=/path/to/chrome` if it isn't at
+`/Applications/Google Chrome.app/...`.
 
-Output for Ermioni is committed under `html/ermioni-recent.html` and
-`pdf/ermioni-recent.pdf` and refreshed on each run.
+Listings with zero photos in their search-result card automatically fall
+back to scraping their detail page so they still get a real photo set
+to rank by.
+
+Latest committed Ermioni catalogs:
+
+- `html/ermioni-recent.html`, `pdf/ermioni-recent.pdf` — sorted by recency
+- `html/ermioni-price-asc.html`, `pdf/ermioni-price-asc.pdf` — sorted by price ascending
 
 ## What we've learned about goutos.gr (e-agents CMS)
 
