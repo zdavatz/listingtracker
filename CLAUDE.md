@@ -68,21 +68,29 @@ upload date. Pipeline:
    no async runtime, no rayon dep). `Last-Modified` parsed with `httpdate`.
 4. Sort listings by `latest` photo date desc; listings with no photos in the
    search-results card sink to the bottom (their `Option<SystemTime>` is `None`).
-5. Render an HTML catalog (one `<div class="card">` per listing, A4 print CSS),
-   write it to `html/<slug>-recent.html`, then spawn headless Chrome with
-   `--print-to-pdf=pdf/<slug>-recent.pdf`. Same Chrome invocation as
-   `~/software/crawl2pump/src/bin/pumpfoil_report.rs`.
+5. Backfill: any listing whose card carousel rendered zero `<img>` tags
+   gets a follow-up GET on its `/en-US/property/<id>` page; full-size
+   photo URLs are extracted by regex (`/fol<id>/<hash>.jpg`, excluding
+   `-thumb.` / `Thumb_`). On the Ermioni dataset this catches ~2 of 190
+   listings — small enough that the eight extra fetches don't matter,
+   but large enough that ranking-by-photo-date would otherwise be wrong
+   for those entries.
+6. Sort according to `--sort latest|price-asc`. Latest = `latest` photo
+   date desc (missing dates last). Price-asc = `parse_price` (digits-only
+   parse) asc, missing prices ("Price upon request") last. The site uses
+   `1 €` as a placeholder for "ask for price" on some rentals — treated
+   as a real price for now since the user might want to spot them; revisit
+   if it gets confusing.
+7. Render an HTML catalog (one `<div class="card">` per listing, A4 print CSS),
+   write it to `html/<area>-<sortslug>.html`, then spawn headless Chrome with
+   `--print-to-pdf=pdf/<area>-<sortslug>.pdf`. Same Chrome invocation as
+   `~/software/crawl2pump/src/bin/pumpfoil_report.rs`. Each sort writes its
+   own pair of files so multiple views can coexist (`ermioni-recent.*`,
+   `ermioni-price-asc.*`, etc.).
 
 `fetch_area_name` resolves an `areaID` to its display name via
 `/ajax/get-areas-by-code?area=<id>` so the catalog title reads "Ermioni"
 instead of "area-3235".
-
-**Known limitation:** some listings render as carousel cards with zero `<img>`
-tags in the search-results HTML (apparently listings with no uploaded photos).
-They show up with `photos: 0` and an em-dash for the dates, sorted to the
-bottom. To rank them properly we'd need to fetch each property's detail page
-and pull photos from there — not done yet because it'd add ~190 extra requests
-per run for marginal benefit.
 
 ## Domain knowledge — non-obvious
 

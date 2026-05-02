@@ -27,6 +27,34 @@ const UA: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) \
 
 const CHROME_MAC: &str = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
+#[derive(Debug, Clone, Copy)]
+enum Sort {
+    Latest,
+    PriceAsc,
+}
+
+impl Sort {
+    fn slug(self) -> &'static str {
+        match self {
+            Sort::Latest => "recent",
+            Sort::PriceAsc => "price-asc",
+        }
+    }
+    fn label(self) -> &'static str {
+        match self {
+            Sort::Latest => "latest photo upload",
+            Sort::PriceAsc => "price ascending",
+        }
+    }
+    fn parse(s: &str) -> Result<Self> {
+        match s {
+            "latest" | "recent" => Ok(Sort::Latest),
+            "price-asc" | "price" => Ok(Sort::PriceAsc),
+            other => anyhow::bail!("unknown --sort value: {} (use 'latest' or 'price-asc')", other),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 struct Listing {
     id: String,
@@ -116,6 +144,81 @@ fn parse_listings(html: &str) -> Vec<Listing> {
     out
 }
 
+/// Fetch a property detail page and extract its full-size photo URLs from
+/// the embedded `ilist-cdn` references. Used as a fallback for listings
+/// whose search-results card carousel renders zero `<img>` tags.
+fn fetch_detail_photos(client: &Client, listing_id: &str) -> Vec<String> {
+    let url = format!("https://www.goutos.gr/en-US/property/{}", listing_id);
+    let html = match client.get(&url).timeout(Duration::from_secs(15)).send() {
+        Ok(r) if r.status().is_success() => r.text().unwrap_or_default(),
+        _ => return Vec::new(),
+    };
+    let pat = format!(
+        r#"https://ilist-cdn[^"'\s<>]+/fol{}/[A-Za-z0-9_-]+\.(?:jpg|jpeg|png)"#,
+        regex::escape(listing_id)
+    );
+    let re = match Regex::new(&pat) {
+        Ok(r) => r,
+        Err(_) => return Vec::new(),
+    };
+    let mut seen = std::collections::BTreeSet::new();
+    for m in re.find_iter(&html) {
+        let s = m.as_str();
+        // Prefer full-size; skip thumbs since they often share the same Last-Modified
+        // but we want a stable URL set for the same listing.
+        if s.contains("-thumb.") || s.contains("Thumb_") {
+            continue;
+        }
+        seen.insert(s.to_string());
+    }
+    seen.into_iter().collect()
+}
+
+fn backfill_missing_photos(client: &Client, listings: &mut [Listing]) {
+    let concurrency = 8usize;
+    let missing: Vec<usize> = listings
+        .iter()
+        .enumerate()
+        .filter(|(_, l)| l.photo_urls.is_empty())
+        .map(|(i, _)| i)
+        .collect();
+    if missing.is_empty() {
+        return;
+    }
+    eprintln!(
+        "  backfilling photos from detail pages for {} listings...",
+        missing.len()
+    );
+    let ids: Vec<(usize, String)> = missing
+        .iter()
+        .map(|&i| (i, listings[i].id.clone()))
+        .collect();
+    let ids = Arc::new(ids);
+    let results: Mutex<Vec<(usize, Vec<String>)>> = Mutex::new(Vec::new());
+
+    thread::scope(|s| {
+        for w in 0..concurrency {
+            let ids = Arc::clone(&ids);
+            let results = &results;
+            s.spawn(move || {
+                let mut local = Vec::new();
+                let mut idx = w;
+                while idx < ids.len() {
+                    let (li, id) = &ids[idx];
+                    let urls = fetch_detail_photos(client, id);
+                    local.push((*li, urls));
+                    idx += concurrency;
+                }
+                results.lock().unwrap().extend(local);
+            });
+        }
+    });
+
+    for (i, urls) in results.into_inner().unwrap() {
+        listings[i].photo_urls = urls;
+    }
+}
+
 fn head_last_modified(client: &Client, url: &str) -> Option<SystemTime> {
     let r = client.head(url).timeout(Duration::from_secs(10)).send().ok()?;
     let v = r.headers().get("Last-Modified")?;
@@ -172,6 +275,15 @@ fn fmt_time(t: Option<SystemTime>) -> String {
     }
 }
 
+/// "1.250.000 €" -> Some(1_250_000); "650 €" -> Some(650); "Price upon request" -> None.
+fn parse_price(s: &str) -> Option<u64> {
+    let digits: String = s.chars().filter(|c| c.is_ascii_digit()).collect();
+    if digits.is_empty() {
+        return None;
+    }
+    digits.parse().ok()
+}
+
 fn fetch_area_name(client: &Client, area_id: &str) -> Option<String> {
     let url = format!("https://www.goutos.gr/ajax/get-areas-by-code?area={}", area_id);
     let resp = client.get(&url).timeout(Duration::from_secs(10)).send().ok()?;
@@ -206,6 +318,7 @@ fn render_html(
     area_label: &str,
     area_id: &str,
     scan_at: DateTime<Utc>,
+    sort_label: &str,
 ) -> String {
     let mut s = String::new();
     s.push_str(&format!(
@@ -213,7 +326,7 @@ fn render_html(
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Recent listings — {label} (area {id})</title>
+<title>Listings — {label} (area {id})</title>
 <style>
   @page {{ size: A4; margin: 12mm; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; color: #222; margin: 0; }}
@@ -235,13 +348,14 @@ fn render_html(
 </head>
 <body>
 <header>
-  <h1>Recent listings — {label} (area {id})</h1>
-  <div class="meta">{n} listings · sorted by latest photo upload · scan {ts} UTC · source goutos.gr</div>
+  <h1>Listings — {label} (area {id})</h1>
+  <div class="meta">{n} listings · sorted by {sort} · scan {ts} UTC · source goutos.gr</div>
 </header>
 "#,
         label = html_escape(area_label),
         id = html_escape(area_id),
         n = listings.len(),
+        sort = html_escape(sort_label),
         ts = scan_at.format("%Y-%m-%d %H:%M"),
     ));
 
@@ -284,17 +398,21 @@ fn write_outputs(
     area_label: &str,
     area_id: &str,
     scan_at: DateTime<Utc>,
+    sort: Sort,
 ) -> Result<(PathBuf, Option<PathBuf>)> {
     let html_dir = PathBuf::from("html");
     let pdf_dir = PathBuf::from("pdf");
     std::fs::create_dir_all(&html_dir)?;
     std::fs::create_dir_all(&pdf_dir)?;
 
-    let slug = area_label.to_lowercase().replace(|c: char| !c.is_ascii_alphanumeric(), "-");
-    let html_path = html_dir.join(format!("{}-recent.html", slug));
-    let pdf_path = pdf_dir.join(format!("{}-recent.pdf", slug));
+    let area_slug = area_label
+        .to_lowercase()
+        .replace(|c: char| !c.is_ascii_alphanumeric(), "-");
+    let slug = format!("{}-{}", area_slug, sort.slug());
+    let html_path = html_dir.join(format!("{}.html", slug));
+    let pdf_path = pdf_dir.join(format!("{}.pdf", slug));
 
-    let html = render_html(listings, area_label, area_id, scan_at);
+    let html = render_html(listings, area_label, area_id, scan_at, sort.label());
     std::fs::write(&html_path, &html)?;
     eprintln!("wrote {}", html_path.display());
 
@@ -327,14 +445,18 @@ fn main() -> Result<()> {
     let mut area = "3235".to_string(); // Ermioni
     let mut pages: u32 = 0; // 0 = walk until empty
     let mut top: Option<usize> = None;
+    let mut sort = Sort::Latest;
     let mut args = env::args().skip(1);
     while let Some(a) = args.next() {
         match a.as_str() {
             "--area" => area = args.next().expect("--area needs a value"),
             "--pages" => pages = args.next().expect("--pages needs a value").parse()?,
             "--top" => top = Some(args.next().expect("--top needs a value").parse()?),
+            "--sort" => sort = Sort::parse(&args.next().expect("--sort needs a value"))?,
             "-h" | "--help" => {
-                println!("recent_listings [--area <id>] [--pages <n>] [--top <n>]");
+                println!(
+                    "recent_listings [--area <id>] [--pages <n>] [--top <n>] [--sort latest|price-asc]"
+                );
                 return Ok(());
             }
             other => anyhow::bail!("unknown arg: {}", other),
@@ -366,6 +488,7 @@ fn main() -> Result<()> {
         listings.append(&mut got);
     }
 
+    backfill_missing_photos(&client, &mut listings);
     let total_photos: usize = listings.iter().map(|l| l.photo_urls.len()).sum();
     eprintln!(
         "Probing {} photos across {} listings for Last-Modified...",
@@ -374,21 +497,38 @@ fn main() -> Result<()> {
     );
     enrich_with_dates(&client, &mut listings);
 
-    // Sort newest-first by latest photo upload; listings with no date go last.
-    listings.sort_by(|a, b| match (a.latest, b.latest) {
-        (Some(x), Some(y)) => y.cmp(&x),
-        (Some(_), None) => std::cmp::Ordering::Less,
-        (None, Some(_)) => std::cmp::Ordering::Greater,
-        (None, None) => std::cmp::Ordering::Equal,
-    });
+    match sort {
+        Sort::Latest => {
+            // Newest-first by latest photo upload; missing dates go last.
+            listings.sort_by(|a, b| match (a.latest, b.latest) {
+                (Some(x), Some(y)) => y.cmp(&x),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            });
+        }
+        Sort::PriceAsc => {
+            // Cheapest first; "Price upon request" / empty go last.
+            listings.sort_by(|a, b| {
+                match (parse_price(&a.price), parse_price(&b.price)) {
+                    (Some(x), Some(y)) => x.cmp(&y),
+                    (Some(_), None) => std::cmp::Ordering::Less,
+                    (None, Some(_)) => std::cmp::Ordering::Greater,
+                    (None, None) => std::cmp::Ordering::Equal,
+                }
+            });
+        }
+    }
 
     let scan_at: DateTime<Utc> = Utc::now();
     let limit = top.unwrap_or(listings.len());
     let display: Vec<Listing> = listings.iter().take(limit).cloned().collect();
 
     println!(
-        "\n=== Most recent listings for {} (area={}) — sorted by latest photo upload ===\n",
-        area_label, area
+        "\n=== Listings for {} (area={}) — sorted by {} ===\n",
+        area_label,
+        area,
+        sort.label()
     );
     for l in &display {
         println!(
@@ -416,6 +556,6 @@ fn main() -> Result<()> {
         println!();
     }
 
-    write_outputs(&display, &area_label, &area, scan_at)?;
+    write_outputs(&display, &area_label, &area, scan_at, sort)?;
     Ok(())
 }
