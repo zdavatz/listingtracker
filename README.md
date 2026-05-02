@@ -24,6 +24,27 @@ cargo run --release --bin inspect_listing
 cargo run --release --bin inspect_listing -- https://www.goutos.gr/en-US/property/500193
 ```
 
+### `recent_listings`
+
+Walk every listing in a goutos.gr area, rank them by the **latest CDN photo
+upload date** (which the goutos.gr listing HTML doesn't expose directly — see
+below), and write a printable catalog to `html/<area>-recent.html` and
+`pdf/<area>-recent.pdf`.
+
+```
+cargo run --release --bin recent_listings                       # default: Ermioni (area 3235), all pages
+cargo run --release --bin recent_listings -- --area 3237        # Portocheli
+cargo run --release --bin recent_listings -- --top 20           # only render the 20 most recent
+```
+
+Defaults to all pages of the area's "newer" sort (currently 11 pages / ~190
+listings for Ermioni). PDF rendering uses headless Chrome via `--print-to-pdf`;
+override the binary path with `CHROME=/path/to/chrome` if it isn't at the
+default `/Applications/Google Chrome.app/...`.
+
+Output for Ermioni is committed under `html/ermioni-recent.html` and
+`pdf/ermioni-recent.pdf` and refreshed on each run.
+
 ## What we've learned about goutos.gr (e-agents CMS)
 
 The HTML for a listing carries **no** date metadata: no `Last-Modified`, no
