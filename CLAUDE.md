@@ -14,18 +14,26 @@ Cloudflare).
 ```
 cargo build --release
 cargo run --release --bin inspect_listing -- <url>
+cargo run --release --bin recent_listings -- [--area <id>] [--pages <n>] [--top <n>]
 ```
 
-Default URL when none given: `https://www.goutos.gr/en-US/property/500193`.
+`recent_listings` requires headless Chrome to print PDFs. It looks at
+`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` by default;
+override with `CHROME=/path/to/chrome`.
 
 There are no tests yet. There is no separate lint config beyond the toolchain
 defaults.
 
 ## Architecture
 
-Single binary today: `src/inspect_listing.rs` (declared as
-`[[bin]] inspect_listing` in `Cargo.toml`). It performs a single blocking
-`reqwest::blocking::Client` GET, then runs each detector in order:
+Two binaries today, both registered explicitly in `Cargo.toml` (no `src/bin/`
+auto-discovery). They share `reqwest::blocking::Client` + `scraper` + a small
+set of regexes; nothing is factored into a library yet because the surface is
+small.
+
+### `src/inspect_listing.rs` — single-listing detector
+
+Performs a blocking GET, then runs each detector in order:
 
 1. **Response headers / cookies** (`Date`, `Last-Modified`, `ETag`, etc.).
 2. **JSON-LD** — `<script type="application/ld+json">`, parsed with
@@ -45,6 +53,36 @@ you add a new target site, extending those is the first thing to do.
 `safe_slice` exists because the snippet windows around regex matches must be
 clamped to UTF-8 char boundaries — the HTML is full of multi-byte Greek text
 and naive `&s[a..b]` panics.
+
+### `src/recent_listings.rs` — area-wide recency catalog
+
+Walks every listing in a goutos.gr area and ranks them by latest CDN photo
+upload date. Pipeline:
+
+1. POST `/en-US/search-results` with `{"area": <id>, "page": <n>, "sorting": "newer"}`
+   in a loop until a page returns zero cards. The endpoint is the same one the
+   site's own JS calls (`render-partial.js`); response is rendered HTML, not JSON.
+2. Parse each `article.geodir-category-listing` card: id, title, property type,
+   price, details, and the carousel thumbnail URLs (`.carousel-inner img[src]`).
+3. Concurrent HEAD on every photo URL via `std::thread::scope` (12 workers,
+   no async runtime, no rayon dep). `Last-Modified` parsed with `httpdate`.
+4. Sort listings by `latest` photo date desc; listings with no photos in the
+   search-results card sink to the bottom (their `Option<SystemTime>` is `None`).
+5. Render an HTML catalog (one `<div class="card">` per listing, A4 print CSS),
+   write it to `html/<slug>-recent.html`, then spawn headless Chrome with
+   `--print-to-pdf=pdf/<slug>-recent.pdf`. Same Chrome invocation as
+   `~/software/crawl2pump/src/bin/pumpfoil_report.rs`.
+
+`fetch_area_name` resolves an `areaID` to its display name via
+`/ajax/get-areas-by-code?area=<id>` so the catalog title reads "Ermioni"
+instead of "area-3235".
+
+**Known limitation:** some listings render as carousel cards with zero `<img>`
+tags in the search-results HTML (apparently listings with no uploaded photos).
+They show up with `photos: 0` and an em-dash for the dates, sorted to the
+bottom. To rank them properly we'd need to fetch each property's detail page
+and pull photos from there — not done yet because it'd add ~190 extra requests
+per run for marginal benefit.
 
 ## Domain knowledge — non-obvious
 
@@ -78,14 +116,40 @@ sessions should not have to re-derive.
 - **Property IDs (`/property/<n>`) appear sequential.** If a future task
   needs to rank listings by recency without doing per-photo HEADs, the ID
   itself is a coarse signal — but only relative to other IDs on the same
-  site.
+  site. Empirically the site's own `sorting:"newer"` order does NOT
+  match either ID order or photo-Last-Modified order, so don't trust it
+  as a recency signal.
+
+- **Useful goutos.gr endpoints (undocumented; reverse-engineered from
+  the site's own JS):**
+  - `POST /en-US/search-results` with JSON body
+    `{"area":"<id>","page":<n>,"sorting":"newer"}` — paginated rendered
+    HTML of the result cards. 18 cards per page; iterate `page` until empty.
+  - `GET /ajax/get-areas?query=<text>` — area autocomplete; returns
+    `{"areas":[{areaID, nameEN, nameGR, parentID, parentNameEN, ...}]}`.
+  - `GET /ajax/get-areas-by-code?area=<id>` — areas by numeric ID
+    (single ID or comma-list).
+  - `POST /en-US/search-results-map` — same body as `/search-results`,
+    returns map markers JSON.
+  - Known top-level area IDs: 3235 = Ermioni, 3237 = Portocheli (both
+    under parentID 151 = Argolis). Sub-areas under Ermioni include
+    103235 Center, 119041 Kouverta, 119046 Kineta, 119047 Agioi Anargiroi,
+    119053 Achladitsa.
 
 ## Conventions
 
 - Default to a single binary per concern; add new ones via `[[bin]]`
-  entries in `Cargo.toml` rather than expanding `inspect_listing` into a
-  multi-mode tool.
-- Print sections with the existing `=== Title ===` style so output stays
-  greppable.
+  entries in `Cargo.toml` rather than expanding existing binaries into
+  multi-mode tools.
+- Print sections with the existing `=== Title ===` style so console
+  output stays greppable.
 - Keep the regexes as the extension point. New target sites should mostly
   mean adding key/value patterns, not new detector functions.
+- Reports go to `html/<slug>.html` + `pdf/<slug>.pdf` at the repo root.
+  Both directories are committed (mirroring `~/software/crawl2pump`'s
+  `PDF/` convention) so the latest catalog is always visible on GitHub
+  without rebuilding.
+- HTML→PDF is always Chrome `--headless=new --print-to-pdf` against a
+  `file://` URL. Don't reach for `wkhtmltopdf` / `weasyprint` / a Rust
+  PDF crate — Chrome handles modern CSS, web fonts, and remote images
+  for free, and the rest of the workspace already standardises on it.
