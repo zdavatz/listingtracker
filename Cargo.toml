@@ -1,0 +1,15 @@
+[package]
+name = "listingtracker"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "inspect_listing"
+path = "src/inspect_listing.rs"
+
+[dependencies]
+anyhow = "1"
+regex = "1"
+reqwest = { version = "0.12", features = ["blocking", "cookies"] }
+scraper = "0.20"
+serde_json = "1"
