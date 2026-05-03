@@ -59,6 +59,34 @@ Latest committed Ermioni catalogs:
 - `html/ermioni-recent.html`, `pdf/ermioni-recent.pdf` — sorted by recency
 - `html/ermioni-price-asc.html`, `pdf/ermioni-price-asc.pdf` — sorted by price ascending
 
+### `geoland_recent_listings`
+
+Same idea as `recent_listings`, but targets [geoland.properties](https://www.geoland.properties)
+(another Greek real estate agency, also covering Ermioni). Their search-result
+cards expose richer per-listing data than goutos (title, location, beds, baths,
+parking, sqm, price all inline) and each card carries a single full-size photo
+which we resize to ≤600 px (Lanczos3 via the `image` crate) before base64-inlining
+into the catalog.
+
+```
+cargo run --release --bin geoland_recent_listings                    # Ermioni, both sale + rent, price-asc
+cargo run --release --bin geoland_recent_listings -- --sort latest   # newest photo first
+cargo run --release --bin geoland_recent_listings -- --sale-only     # exclude rentals
+```
+
+Defaults to `--sort price-asc` (geoland mixes per-month rentals and one-off
+agency `1 €` placeholders into the same list, so the very top of the
+ascending sort is mostly junk — use `--sale-only` for a cleaner view, or just
+read past the placeholders).
+
+Latest committed Ermioni catalogs:
+
+- `html/geoland-ermioni-recent.html`, `pdf/geoland-ermioni-recent.pdf`
+- `html/geoland-ermioni-price-asc.html`, `pdf/geoland-ermioni-price-asc.pdf`
+
+For Ermioni: 301 listings (278 sale + 23 rent) — significantly more than
+goutos's 190.
+
 ## What we've learned about goutos.gr (e-agents CMS)
 
 The HTML for a listing carries **no** date metadata: no `Last-Modified`, no
