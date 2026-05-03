@@ -14,10 +14,11 @@ Cloudflare).
 ```
 cargo build --release
 cargo run --release --bin inspect_listing -- <url>
-cargo run --release --bin recent_listings -- [--area <id>] [--pages <n>] [--top <n>]
+cargo run --release --bin recent_listings -- [--area <id>] [--pages <n>] [--top <n>] [--sort latest|price-asc]
+cargo run --release --bin geoland_recent_listings -- [--area <id>] [--top <n>] [--sort latest|price-asc] [--sale-only|--rent-only]
 ```
 
-`recent_listings` requires headless Chrome to print PDFs. It looks at
+The `*_recent_listings` binaries require headless Chrome to print PDFs. They look at
 `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` by default;
 override with `CHROME=/path/to/chrome`.
 
@@ -26,10 +27,13 @@ defaults.
 
 ## Architecture
 
-Two binaries today, both registered explicitly in `Cargo.toml` (no `src/bin/`
+Three binaries today, all registered explicitly in `Cargo.toml` (no `src/bin/`
 auto-discovery). They share `reqwest::blocking::Client` + `scraper` + a small
 set of regexes; nothing is factored into a library yet because the surface is
-small.
+small. The two `*_recent_listings` binaries deliberately duplicate their
+`Sort` enum / inlining / writer / Chrome invocation rather than share a module
+— each site needs its own card parser + URL scheme, and keeping them
+independent makes it easier to evolve one without breaking the other.
 
 ### `src/inspect_listing.rs` — single-listing detector
 
@@ -92,6 +96,33 @@ upload date. Pipeline:
 `/ajax/get-areas-by-code?area=<id>` so the catalog title reads "Ermioni"
 instead of "area-3235".
 
+### `src/geoland_recent_listings.rs` — geoland.properties area catalog
+
+Parallel to `recent_listings` but targets [geoland.properties](https://www.geoland.properties),
+a different agency that also covers Ermioni and exposes a much richer
+search-result card (title / location / beds / baths / parking / sqm / price
+all inline, no detail-page fallback needed).
+
+Differences from the goutos version:
+
+- One photo per listing (the `listing-img`), not a carousel — so each
+  listing carries a single `last_modified` rather than `earliest`/`latest`.
+- The "thumbnail" returned by geoland is the **full-size original** (~2 MB
+  JPEG). Inlining 300 of those raw blew the HTML to 435 MB — fixed by
+  decoding + Lanczos3-resizing to ≤600 px + re-encoding JPEG quality 70 in
+  pure Rust via the `image` crate. Result: ~30-70 KB per thumbnail, ~20 MB
+  HTML for 301 cards.
+- Default `--sort` is `price-asc` (not `latest`) because that's what the
+  user asked for. There's a `--sale-only` / `--rent-only` filter for when
+  the cheap-rentals-at-the-top problem gets distracting.
+- Walks both `for=1` (sale) and `for=2` (rent) by default and renders
+  them in a single catalog with a SALE/RENT badge per card.
+
+`fetch_area_name` resolves an `areaID` differently here: it calls
+`/listingsearhPath/for/sale/areas/r<id>` (the slug-builder) and
+title-cases the last URL segment. So `r3235 → "sale-akiniton/ermioni" →
+"Ermioni"`.
+
 ## Domain knowledge — non-obvious
 
 This is the part that took experimentation to discover and that future
@@ -127,6 +158,28 @@ sessions should not have to re-derive.
   site. Empirically the site's own `sorting:"newer"` order does NOT
   match either ID order or photo-Last-Modified order, so don't trust it
   as a recency signal.
+
+- **Useful geoland.properties endpoints (undocumented; reverse-engineered
+  from `assets/js/listings.js` and `home.js`):**
+  - `POST /getAllLoc/<term>` — area autocomplete; returns
+    `[{id:"r3235", text:"Ermioni (Argolis)", areaID:..., ...}]`. The `r`
+    prefix denotes a region; `l` denotes a sub-location.
+  - `GET /listings_async/page/<n>/for/<1|2>/areas/r<id>` — paginated
+    rendered HTML for a search. `for=1` is sale, `for=2` is rent. 12
+    cards per page; iterate until empty.
+  - `GET /listingsearhPath/for/sale/areas/r<id>` — converts URI params
+    to a pretty slug (e.g. `sale-akiniton/ermioni`). Useful for
+    extracting the area's English name.
+  - `GET /property/<internal_id>` — single property page. Note: the
+    `internal_id` (e.g. `7168`) and the public-facing `Code` field
+    (e.g. `8208`) are **two different numbers** — both surfaced on the
+    search-result card. The URL takes the internal id.
+  - User-facing search-results URL is `/poliseis-akiniton/<area-name>`
+    for sales or `/enoikiaseis-akiniton/<area-name>` for rentals — but
+    those serve the SPA shell; data only loads via `listings_async`.
+  - For Ermioni: 278 sale + 23 rent = 301 listings. Geoland's area IDs
+    happen to match goutos.gr's (Ermioni=3235 on both, presumably both
+    pulling from the same Greek public registry).
 
 - **Useful goutos.gr endpoints (undocumented; reverse-engineered from
   the site's own JS):**

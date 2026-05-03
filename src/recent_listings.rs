@@ -65,6 +65,7 @@ struct Listing {
     photo_urls: Vec<String>,
     earliest: Option<SystemTime>,
     latest: Option<SystemTime>,
+    thumb_data_uri: Option<String>,
 }
 
 fn build_client() -> Result<Client> {
@@ -139,6 +140,7 @@ fn parse_listings(html: &str) -> Vec<Listing> {
             photo_urls,
             earliest: None,
             latest: None,
+            thumb_data_uri: None,
         });
     }
     out
@@ -265,6 +267,71 @@ fn enrich_with_dates(client: &Client, listings: &mut [Listing]) {
     }
 }
 
+/// Fetch each listing's first photo URL, base64-encode the bytes, and store
+/// the result as a `data:image/...;base64,...` URI on the listing. Used so
+/// the printed PDF doesn't depend on Chrome's headless renderer winning a
+/// race against ~190 concurrent CDN fetches at print time.
+fn inline_thumbnails(client: &Client, listings: &mut [Listing]) {
+    let concurrency = 12usize;
+    let tasks: Vec<(usize, String)> = listings
+        .iter()
+        .enumerate()
+        .filter_map(|(i, l)| l.photo_urls.first().map(|u| (i, u.clone())))
+        .collect();
+    if tasks.is_empty() {
+        return;
+    }
+    eprintln!("Inlining {} thumbnails as data URIs...", tasks.len());
+
+    let tasks = Arc::new(tasks);
+    let results: Mutex<Vec<(usize, Option<String>)>> =
+        Mutex::new(Vec::with_capacity(tasks.len()));
+
+    thread::scope(|s| {
+        for w in 0..concurrency {
+            let tasks = Arc::clone(&tasks);
+            let results = &results;
+            s.spawn(move || {
+                let mut local = Vec::new();
+                let mut idx = w;
+                while idx < tasks.len() {
+                    let (li, url) = &tasks[idx];
+                    let uri = fetch_as_data_uri(client, url);
+                    local.push((*li, uri));
+                    idx += concurrency;
+                }
+                results.lock().unwrap().extend(local);
+            });
+        }
+    });
+
+    let mut ok = 0usize;
+    for (i, uri) in results.into_inner().unwrap() {
+        if uri.is_some() {
+            ok += 1;
+        }
+        listings[i].thumb_data_uri = uri;
+    }
+    eprintln!("  inlined {} / {} thumbnails", ok, tasks.len());
+}
+
+fn fetch_as_data_uri(client: &Client, url: &str) -> Option<String> {
+    use base64::Engine;
+    let resp = client.get(url).timeout(Duration::from_secs(15)).send().ok()?;
+    if !resp.status().is_success() {
+        return None;
+    }
+    let mime = resp
+        .headers()
+        .get("Content-Type")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| "image/jpeg".to_string());
+    let bytes = resp.bytes().ok()?;
+    let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+    Some(format!("data:{};base64,{}", mime, b64))
+}
+
 fn fmt_time(t: Option<SystemTime>) -> String {
     match t {
         Some(t) => {
@@ -360,7 +427,7 @@ fn render_html(
     ));
 
     for l in listings {
-        let thumb_html = match l.photo_urls.first() {
+        let thumb_html = match l.thumb_data_uri.as_deref().or_else(|| l.photo_urls.first().map(String::as_str)) {
             Some(u) => format!(r#"<img class="thumb" src="{}" alt="">"#, html_escape(u)),
             None => r#"<div class="thumb empty">no photo</div>"#.to_string(),
         };
@@ -430,6 +497,7 @@ fn write_outputs(
             "--headless=new",
             "--disable-gpu",
             "--no-pdf-header-footer",
+            "--virtual-time-budget=60000",
             &format!("--print-to-pdf={}", pdf_path.display()),
             &format!("file://{}", abs.display()),
         ])
@@ -522,7 +590,8 @@ fn main() -> Result<()> {
 
     let scan_at: DateTime<Utc> = Utc::now();
     let limit = top.unwrap_or(listings.len());
-    let display: Vec<Listing> = listings.iter().take(limit).cloned().collect();
+    let mut display: Vec<Listing> = listings.iter().take(limit).cloned().collect();
+    inline_thumbnails(&client, &mut display);
 
     println!(
         "\n=== Listings for {} (area={}) — sorted by {} ===\n",

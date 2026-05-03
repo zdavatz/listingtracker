@@ -11,10 +11,16 @@ path = "src/inspect_listing.rs"
 name = "recent_listings"
 path = "src/recent_listings.rs"
 
+[[bin]]
+name = "geoland_recent_listings"
+path = "src/geoland_recent_listings.rs"
+
 [dependencies]
 anyhow = "1"
+base64 = "0.22"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 httpdate = "1"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
 regex = "1"
 reqwest = { version = "0.12", features = ["blocking", "cookies"] }
 scraper = "0.20"
