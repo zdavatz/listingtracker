@@ -37,6 +37,12 @@ const MAX_IMG_H_MM: f64 = 180.0;
 // display size to keep the file shareable while staying print-sharp.
 const TARGET_LONG_PX: u32 = 1100;
 
+// Location (Google Maps) and the goutos.gr listing for the house. genpdf 0.2
+// has no hyperlink support, so these render as selectable URL text on the
+// cover; most PDF viewers auto-linkify them.
+const MAPS_URL: &str = "https://maps.app.goo.gl/gXk1sFUhneHTnthr5";
+const LISTING_URL: &str = "https://www.goutos.gr/en-US/property/500193";
+
 // Palette echoing the old CSS design.
 const GOLD: Color = Color::Rgb(0xa0, 0x8b, 0x6a);
 const BROWN: Color = Color::Rgb(0x6b, 0x5a, 0x44);
@@ -89,6 +95,18 @@ impl Lang {
         match self {
             Lang::De => "BILD",
             Lang::El => "ΕΙΚΟΝΑ",
+        }
+    }
+    fn location_label(self) -> &'static str {
+        match self {
+            Lang::De => "Ort",
+            Lang::El => "Τοποθεσία",
+        }
+    }
+    fn listing_label(self) -> &'static str {
+        match self {
+            Lang::De => "Inserat",
+            Lang::El => "Αγγελία",
         }
     }
     fn footer(self, name: &str) -> String {
@@ -300,6 +318,20 @@ fn render(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<
         &mut doc,
         lang.lead(),
         Style::new().with_color(BROWN).with_font_size(11),
+        Alignment::Center,
+    );
+    doc.push(Break::new(2.0));
+    push_lines(
+        &mut doc,
+        &format!("{}: {}", lang.location_label(), MAPS_URL),
+        Style::new().with_color(BROWN).with_font_size(10),
+        Alignment::Center,
+    );
+    doc.push(Break::new(0.4));
+    push_lines(
+        &mut doc,
+        &format!("{}: {}", lang.listing_label(), LISTING_URL),
+        Style::new().with_color(BROWN).with_font_size(10),
         Alignment::Center,
     );
     doc.push(PageBreak::new());
