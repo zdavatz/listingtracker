@@ -15,9 +15,14 @@ path = "src/recent_listings.rs"
 name = "geoland_recent_listings"
 path = "src/geoland_recent_listings.rs"
 
+[[bin]]
+name = "baugeschichte"
+path = "src/baugeschichte.rs"
+
 [dependencies]
 anyhow = "1"
 base64 = "0.22"
+genpdf = { version = "0.2", features = ["images"] }
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 httpdate = "1"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }

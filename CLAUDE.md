@@ -16,11 +16,15 @@ cargo build --release
 cargo run --release --bin inspect_listing -- <url>
 cargo run --release --bin recent_listings -- [--area <id>] [--pages <n>] [--top <n>] [--sort latest|price-asc]
 cargo run --release --bin geoland_recent_listings -- [--area <id>] [--top <n>] [--sort latest|price-asc] [--sale-only|--rent-only]
+cargo run --release --bin baugeschichte -- [--lang de|el|both]
 ```
 
 The `*_recent_listings` binaries require headless Chrome to print PDFs. They look at
 `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` by default;
 override with `CHROME=/path/to/chrome`.
+
+`baugeschichte` is the exception: it builds its PDF in **pure Rust via `genpdf`**
+(no Chrome), so it has no Chrome dependency — see its section below.
 
 There are no tests yet. There is no separate lint config beyond the toolchain
 defaults.
@@ -123,6 +127,49 @@ Differences from the goutos version:
 title-cases the last URL segment. So `r3235 → "sale-akiniton/ermioni" →
 "Ermioni"`.
 
+### `src/baugeschichte.rs` — Erica's house photo-documentation PDF
+
+Unrelated to listing scraping: turns the WhatsApp messages Erica Baumann sent
+about buying and rebuilding her house in Ermioni (synced into
+`erica-house/messages.json` by the pegelstand WhatsApp toolchain) into a titled
+photo book — German (`baugeschichte.pdf`) and Greek (`baugeschichte_gr.pdf`).
+
+Pipeline:
+
+1. Parse `erica-house/messages.json` (`matches[0].messages`) with `serde_json`,
+   keep Erica's own messages (`!fromMe`) sorted by `ts`. First text note → intro
+   blockquote; remaining text notes → closing note; messages with an image
+   `file` → photo plates in order.
+2. Build the document with `genpdf` (writes PDF via `printpdf` — **pure Rust, no
+   Chrome**). DejaVu Sans family (Regular/Bold/Oblique/BoldOblique) is embedded
+   from `$FONT_DIR` (default `/usr/share/fonts/dejavu`) because it covers Latin
+   + Greek + umlauts in one face.
+3. One photo per page (`PageBreak` before each plate, and before the closing
+   note). genpdf can neither split an image nor keep a group together, so a tall
+   portrait photo starting mid-page would overflow the bottom edge — giving each
+   plate its own page is the fix.
+4. Greek output: a static `TR` map (German-trimmed → Greek) translates the
+   cover, intro, every caption and the closing note. Unmapped text falls through
+   unchanged so nothing is silently dropped. The `Lang` enum carries all the
+   static UI strings.
+
+Non-obvious gotchas:
+
+- **Image size.** `printpdf 0.3` (pinned by genpdf 0.2) embeds photos as a raw
+  raster (Flate-compressed, no JPEG passthrough), so PDF size tracks pixel
+  count, not source JPEG bytes. Photos are downscaled to a 1100 px long edge
+  (Lanczos3) before embedding — that's ~150 dpi at full display size and keeps
+  each PDF ~23 MB instead of ~46 MB. The result is still much larger than the
+  old Chrome/weasyprint version (2.8 MB, real embedded JPEG); that's the price
+  of dropping the Chrome dependency.
+- **image-crate version skew.** This project uses `image` 0.25; genpdf 0.2 uses
+  `image` 0.23 internally, so a `DynamicImage` can't be passed across. We
+  resize with 0.25, re-encode to in-memory JPEG bytes, and hand those to
+  `genpdf::elements::Image::from_reader` (genpdf decodes them itself).
+- **DPI = fit, not quality.** `dpi_for` picks the DPI that makes a photo fit the
+  printable box (cap on the more constraining dimension), so genpdf scales it
+  down to the page rather than rendering at native size.
+
 ## Domain knowledge — non-obvious
 
 This is the part that took experimentation to discover and that future
@@ -210,7 +257,10 @@ sessions should not have to re-derive.
   Both directories are committed (mirroring `~/software/crawl2pump`'s
   `PDF/` convention) so the latest catalog is always visible on GitHub
   without rebuilding.
-- HTML→PDF is always Chrome `--headless=new --print-to-pdf` against a
-  `file://` URL. Don't reach for `wkhtmltopdf` / `weasyprint` / a Rust
-  PDF crate — Chrome handles modern CSS, web fonts, and remote images
-  for free, and the rest of the workspace already standardises on it.
+- For **catalog** PDFs (the `*_recent_listings` binaries) HTML→PDF is always
+  Chrome `--headless=new --print-to-pdf` against a `file://` URL. Don't reach
+  for `wkhtmltopdf` / `weasyprint` there — Chrome handles modern CSS, web
+  fonts, and remote images for free, and the catalogs already standardise on
+  it. The one exception is `baugeschichte`, which is deliberately pure-Rust
+  (`genpdf`, no Chrome) at the cost of a simpler layout and larger files;
+  reach for genpdf only when a no-Chrome dependency is the explicit goal.

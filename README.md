@@ -87,6 +87,26 @@ Latest committed Ermioni catalogs:
 For Ermioni: 301 listings (278 sale + 23 rent) — significantly more than
 goutos's 190.
 
+### `baugeschichte`
+
+Render the "Baugeschichte" (building history) of Erica's house in Ermioni from
+synced WhatsApp data into a photo-documentation PDF — German and Greek. Unlike
+the catalog binaries, this one is **pure Rust, no Chrome**: the PDF is built
+directly with `genpdf` (DejaVu Sans embedded for Latin + Greek glyphs), one
+photo per page so tall portrait shots never overflow.
+
+```
+cargo run --release --bin baugeschichte                 # both DE + EL
+cargo run --release --bin baugeschichte -- --lang de    # German only
+cargo run --release --bin baugeschichte -- --lang el    # Greek only
+```
+
+Reads `erica-house/messages.json` plus the photos in `erica-house/`, writes
+`erica-house/baugeschichte.pdf` and `erica-house/baugeschichte_gr.pdf`. Font
+dir override: `FONT_DIR=` (default `/usr/share/fonts/dejavu`). The German →
+Greek translation of the cover, intro, captions and closing note lives as a
+static map in the binary.
+
 ## What we've learned about goutos.gr (e-agents CMS)
 
 The HTML for a listing carries **no** date metadata: no `Last-Modified`, no
