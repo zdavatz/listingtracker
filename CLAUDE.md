@@ -152,6 +152,14 @@ Pipeline:
    cover, intro, every caption and the closing note. Unmapped text falls through
    unchanged so nothing is silently dropped. The `Lang` enum carries all the
    static UI strings.
+5. Clickable cover links (`add_cover_links`): genpdf 0.2 can't emit hyperlinks,
+   so after `render_to_file` the PDF is reopened with `lopdf` and `/Link` URI
+   annotations are overlaid on the Maps + goutos URL lines. The two URL lines
+   are the only text on page 1 drawn at `COVER_LINK_FONT_SIZE` (10 pt), so they
+   are located by scanning the content stream for `Td`/`Tm` origins at that font
+   size — the glyph text is CID-encoded and unreadable, but the position
+   operators are plain numbers. Lines are centred, so the link rect spans
+   `x … (A4_WIDTH_PT − x)`. Keep the layout font size and the const in sync.
 
 Non-obvious gotchas:
 

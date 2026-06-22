@@ -107,6 +107,10 @@ dir override: `FONT_DIR=` (default `/usr/share/fonts/dejavu`). The German →
 Greek translation of the cover, intro, captions and closing note lives as a
 static map in the binary.
 
+The cover carries the house's **clickable** Google Maps location and goutos.gr
+listing links. genpdf can't emit hyperlinks, so the finished PDF is reopened
+with `lopdf` and `/Link` URI annotations are overlaid on the two URL lines.
+
 ## What we've learned about goutos.gr (e-agents CMS)
 
 The HTML for a listing carries **no** date metadata: no `Last-Modified`, no

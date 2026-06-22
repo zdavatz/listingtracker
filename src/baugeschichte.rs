@@ -43,6 +43,12 @@ const TARGET_LONG_PX: u32 = 1100;
 const MAPS_URL: &str = "https://maps.app.goo.gl/gXk1sFUhneHTnthr5";
 const LISTING_URL: &str = "https://www.goutos.gr/en-US/property/500193";
 
+// The two cover URL lines are the ONLY text drawn at this size on page 1, which
+// is how add_cover_links() locates them in the content stream to overlay
+// clickable link annotations. Keep layout and finder in sync via this const.
+const COVER_LINK_FONT_SIZE: u8 = 10;
+const A4_WIDTH_PT: f64 = 595.276;
+
 // Palette echoing the old CSS design.
 const GOLD: Color = Color::Rgb(0xa0, 0x8b, 0x6a);
 const BROWN: Color = Color::Rgb(0x6b, 0x5a, 0x44);
@@ -324,14 +330,14 @@ fn render(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<
     push_lines(
         &mut doc,
         &format!("{}: {}", lang.location_label(), MAPS_URL),
-        Style::new().with_color(BROWN).with_font_size(10),
+        Style::new().with_color(BROWN).with_font_size(COVER_LINK_FONT_SIZE),
         Alignment::Center,
     );
     doc.push(Break::new(0.4));
     push_lines(
         &mut doc,
         &format!("{}: {}", lang.listing_label(), LISTING_URL),
-        Style::new().with_color(BROWN).with_font_size(10),
+        Style::new().with_color(BROWN).with_font_size(COVER_LINK_FONT_SIZE),
         Alignment::Center,
     );
     doc.push(PageBreak::new());
@@ -429,8 +435,109 @@ fn render(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<
     let pdf_path = PathBuf::from(DIR).join(format!("baugeschichte{}.pdf", lang.slug_suffix()));
     doc.render_to_file(&pdf_path)
         .map_err(|e| anyhow!("render {}: {}", pdf_path.display(), e))?;
-    eprintln!("wrote {}", pdf_path.display());
+    // genpdf has no hyperlink support, so overlay clickable link annotations
+    // onto the two cover URL lines as a post-process step.
+    let added = add_cover_links(&pdf_path)?;
+    eprintln!("wrote {} ({} clickable cover links)", pdf_path.display(), added);
     Ok(pdf_path)
+}
+
+/// Overlay clickable Link annotations onto the cover's two URL lines. genpdf
+/// 0.2 can't emit hyperlinks, so we reopen the finished PDF with lopdf, locate
+/// the only two text lines drawn at COVER_LINK_FONT_SIZE on page 1 (reading
+/// their glyph-origin from the content stream — the text itself is encoded as
+/// CIDs, but the position operators are plain numbers), and attach a /Link with
+/// a URI action. Because the lines are centred, the box spans x … (width − x).
+/// Returns how many links were added.
+fn add_cover_links(pdf_path: &Path) -> Result<usize> {
+    use lopdf::{Dictionary, Document, Object, StringFormat};
+
+    let mut doc = Document::load(pdf_path)?;
+    let page_id = *doc
+        .get_pages()
+        .get(&1)
+        .ok_or_else(|| anyhow!("PDF has no page 1"))?;
+    let content = doc.get_and_decode_page_content(page_id)?;
+
+    let num = |o: &Object| -> Option<f64> {
+        match o {
+            Object::Real(r) => Some(*r as f64),
+            Object::Integer(i) => Some(*i as f64),
+            _ => None,
+        }
+    };
+
+    // Walk the content stream tracking the current text origin + font size;
+    // record the origin of each text-show run drawn at the link font size.
+    let mut pos = (0.0f64, 0.0f64);
+    let mut size = 0.0f64;
+    let mut origins: Vec<(f64, f64)> = Vec::new();
+    for op in &content.operations {
+        match op.operator.as_str() {
+            "Td" | "TD" if op.operands.len() >= 2 => {
+                if let (Some(x), Some(y)) = (num(&op.operands[0]), num(&op.operands[1])) {
+                    pos = (x, y);
+                }
+            }
+            "Tm" if op.operands.len() >= 6 => {
+                if let (Some(x), Some(y)) = (num(&op.operands[4]), num(&op.operands[5])) {
+                    pos = (x, y);
+                }
+            }
+            "Tf" if op.operands.len() >= 2 => {
+                if let Some(s) = num(&op.operands[1]) {
+                    size = s;
+                }
+            }
+            "Tj" | "TJ" => {
+                if (size - COVER_LINK_FONT_SIZE as f64).abs() < 0.01
+                    && origins.last() != Some(&pos)
+                {
+                    origins.push(pos);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // Top-most line first: location (Ort), then the listing (Inserat) — matching
+    // the order they are pushed onto the cover.
+    origins.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    let urls = [MAPS_URL, LISTING_URL];
+
+    let mut annot_refs: Vec<Object> = Vec::new();
+    for ((x, y), url) in origins.iter().zip(urls.iter()) {
+        let mut action = Dictionary::new();
+        action.set("S", Object::Name(b"URI".to_vec()));
+        action.set("URI", Object::String(url.as_bytes().to_vec(), StringFormat::Literal));
+        let mut annot = Dictionary::new();
+        annot.set("Type", Object::Name(b"Annot".to_vec()));
+        annot.set("Subtype", Object::Name(b"Link".to_vec()));
+        annot.set(
+            "Rect",
+            Object::Array(vec![
+                Object::Real((*x - 2.0) as f32),
+                Object::Real((*y - 2.0) as f32),
+                Object::Real((A4_WIDTH_PT - *x + 2.0) as f32),
+                Object::Real((*y + COVER_LINK_FONT_SIZE as f64 + 2.0) as f32),
+            ]),
+        );
+        annot.set("Border", Object::Array(vec![0.into(), 0.into(), 0.into()]));
+        annot.set("A", Object::Dictionary(action));
+        let id = doc.add_object(annot);
+        annot_refs.push(Object::Reference(id));
+    }
+
+    let added = annot_refs.len();
+    if added > 0 {
+        let page = doc.get_object_mut(page_id)?.as_dict_mut()?;
+        match page.get_mut(b"Annots") {
+            Ok(Object::Array(arr)) => arr.extend(annot_refs),
+            _ => page.set("Annots", Object::Array(annot_refs)),
+        }
+        doc.save(pdf_path)?;
+    }
+    Ok(added)
 }
 
 fn main() -> Result<()> {

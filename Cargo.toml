@@ -23,6 +23,7 @@ path = "src/baugeschichte.rs"
 anyhow = "1"
 base64 = "0.22"
 genpdf = { version = "0.2", features = ["images"] }
+lopdf = "0.34"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 httpdate = "1"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
