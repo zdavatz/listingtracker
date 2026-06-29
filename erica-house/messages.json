@@ -2,7 +2,7 @@
   "cutoff": 1782000000,
   "matches": [
     {
-      "count": 64,
+      "count": 63,
       "jid": "41765073911@s.whatsapp.net",
       "messages": [
         {
@@ -698,17 +698,6 @@
           "text": "Perfekte Leistung .",
           "ts": 1782656942,
           "type": "image"
-        },
-        {
-          "fromMe": false,
-          "id": "1782658339-0",
-          "iso": "2026-06-28T14:52:19.000Z",
-          "jid": "161881780133908@lid",
-          "media": null,
-          "sender": "Erica Davatz-Baumann",
-          "text": "Du kannstauch welche Fotos löschen. Ich habe Unmengen.",
-          "ts": 1782658339,
-          "type": "text"
         },
         {
           "bytes": 111848,

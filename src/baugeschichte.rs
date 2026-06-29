@@ -206,8 +206,6 @@ const TR: &[(&str, &str)] = &[
      "Εργασίες ασφαλτόστρωσης."),
     ("Perfekte Leistung .",
      "Τέλεια απόδοση."),
-    ("Du kannstauch welche Fotos löschen. Ich habe Unmengen.",
-     "Μπορείς και να διαγράψεις κάποιες φωτογραφίες. Έχω αμέτρητες."),
     ("Nach der Strasse Renovierung wurde das Wohnzimmer renoviert. Denn, nach starken Regenfällen blieb das Wasser an der Mauer liegen bis zur Verdampfung. Somit war der Wohnbereich immer feucht.",
      "Μετά την ανακαίνιση του δρόμου ανακαινίστηκε το σαλόνι. Διότι, μετά από έντονες βροχοπτώσεις, το νερό έμενε στον τοίχο μέχρι να εξατμιστεί. Έτσι ο χώρος κατοικίας ήταν πάντα υγρός."),
     ("Wohnzimmer mit Chminée.  Neu.",
