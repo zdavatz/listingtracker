@@ -1,434 +1,917 @@
 {
+  "cutoff": 1782000000,
+  "matches": [
+    {
+      "count": 64,
+      "jid": "41765073911@s.whatsapp.net",
+      "messages": [
+        {
+          "fromMe": false,
+          "id": "1781762101-0",
+          "iso": "2026-06-18T05:55:01.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erika Baumann",
+          "text": "Guten Tag lieber Zeno\nGerne treffe ich dich zu einem Gespräch, das der Verkauf von meinem Häuschen in Ermioni betrifft. \nBitte mach mir einen Vorschlag. \n           Grüsse aus Höngg\n           Erika",
+          "ts": 1781762101,
+          "type": "text"
+        },
+        {
+          "bytes": 127741,
+          "file": "001_image_1781786702_1.jpg",
+          "fromMe": false,
+          "id": "1781786702-0",
+          "iso": "2026-06-18T12:45:02.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "1990 H.Besichtigung und gekauft.\nRe. Rotestor H.Eingang.\nWäsche der Nachbarn.",
+          "ts": 1781786702,
+          "type": "image"
+        },
+        {
+          "bytes": 259458,
+          "file": "002_image_1781787149_2.jpg",
+          "fromMe": false,
+          "id": "1781787149-0",
+          "iso": "2026-06-18T12:52:29.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Abbruch von 2 kleinen Balkonen für Chminéeholz.\nLi. S. hinten Dusche m. WC. Re. Eingangstor.\nHeute geschlossener Duschraum.",
+          "ts": 1781787149,
+          "type": "image"
+        },
+        {
+          "bytes": 219058,
+          "file": "003_image_1781787810_3.jpg",
+          "fromMe": false,
+          "id": "1781787810-0",
+          "iso": "2026-06-18T13:03:30.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Neuer TerrassenAufbau.\nNeuer doppelter Dach-\nIsolierung.",
+          "ts": 1781787810,
+          "type": "image"
+        },
+        {
+          "bytes": 241371,
+          "file": "004_image_1781788081_4.jpg",
+          "fromMe": false,
+          "id": "1781788081-0",
+          "iso": "2026-06-18T13:08:01.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Anfertigung von zwei BalkonSeitenwände zu den Nachbarn.",
+          "ts": 1781788081,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1781790287-0",
+          "iso": "2026-06-18T13:44:47.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erika Baumann",
+          "text": "Kommt noch einiges mehr. Auch von der Gasse und Wohnzimmer vor 5-6 Jahren.",
+          "ts": 1781790287,
+          "type": "text"
+        },
+        {
+          "fromMe": false,
+          "id": "1781790378-0",
+          "iso": "2026-06-18T13:46:18.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erika Baumann",
+          "text": "Muss nun einen Unterbruch machen.",
+          "ts": 1781790378,
+          "type": "text"
+        },
+        {
+          "bytes": 129312,
+          "file": "000_image_1781850804_0.jpg",
+          "fromMe": false,
+          "id": "1781850804-0",
+          "iso": "2026-06-19T06:33:24.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Alte Küche mit einem kleinen Fenster.",
+          "ts": 1781850804,
+          "type": "image"
+        },
+        {
+          "bytes": 172954,
+          "file": "001_image_1781851423_1.jpg",
+          "fromMe": false,
+          "id": "1781851423-0",
+          "iso": "2026-06-19T06:43:43.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Hinter der Küche und Duschraum kam eine kurze Treppe vom Nachbarhaus in m. Haus.\nAusgeräumt, umfunktioniert zu einem geschlossenen Putzschrank.",
+          "ts": 1781851423,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1781851467-0",
+          "iso": "2026-06-19T06:44:27.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erika Baumann",
+          "text": "",
+          "ts": 1781851467,
+          "type": "text"
+        },
+        {
+          "bytes": 146440,
+          "file": "003_image_1781851998_3.jpg",
+          "fromMe": false,
+          "id": "1781851998-0",
+          "iso": "2026-06-19T06:53:18.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Durch einen kleinen Durchgang mit 2 grossen Bollensteine gelangte man\nIn Chminéeraum= Wohnraum.",
+          "ts": 1781851998,
+          "type": "image"
+        },
+        {
+          "bytes": 133044,
+          "file": "004_image_1781852326_4.jpg",
+          "fromMe": false,
+          "id": "1781852326-0",
+          "iso": "2026-06-19T06:58:46.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Fenster zur zur hinteren Gasse.",
+          "ts": 1781852326,
+          "type": "image"
+        },
+        {
+          "bytes": 114662,
+          "file": "005_image_1781852805_5.jpg",
+          "fromMe": false,
+          "id": "1781852805-0",
+          "iso": "2026-06-19T07:06:45.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Fenster im Wohnraum, Chminée, Sicht in einem Schacht zum Nachbar. Der mit grossen unvertigen grossen Haus.\nAnstelle vom Schacht wurde ein Kasten gebaut für Büroarbeiten.",
+          "ts": 1781852805,
+          "type": "image"
+        },
+        {
+          "bytes": 120096,
+          "file": "006_image_1781852896_6.jpg",
+          "fromMe": false,
+          "id": "1781852896-0",
+          "iso": "2026-06-19T07:08:16.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Aufstieg in 1. Stock.",
+          "ts": 1781852896,
+          "type": "image"
+        },
+        {
+          "bytes": 144073,
+          "file": "007_image_1781853460_7.jpg",
+          "fromMe": false,
+          "id": "1781853460-0",
+          "iso": "2026-06-19T07:17:40.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erika Baumann",
+          "text": "Oberhalb der Treppe befindet sich ein AtrappenFenster. Auf passen beim Aufstieg.\n„Dunkelheit“. Böden wurden im ganzen erneuert.",
+          "ts": 1781853460,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1781853991-0",
+          "iso": "2026-06-19T07:26:31.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erika Baumann",
+          "text": "Entschuldige, habe beim durchlesen einige Flüchtigkeitsfehler entdeckt. \n            Am Nachmittag geht es weiter.",
+          "ts": 1781853991,
+          "type": "text"
+        },
+        {
+          "fromMe": false,
+          "id": "1782068287-0",
+          "iso": "2026-06-21T18:58:07.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": null,
+          "sender": "",
+          "text": "",
+          "ts": 1782068287,
+          "type": "text"
+        },
+        {
+          "fromMe": false,
+          "id": "1782070400-0",
+          "iso": "2026-06-21T19:33:20.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": null,
+          "sender": "",
+          "text": "Zu meinem anderen Nachbar mit kl. Haus. Hauseingang zur Strasse. \nDas Haus hat er geerbt.\nAls ehemaliger Schiffsingenieur war sein Wunsch selbstständig einige Reparaturen am Haus zu machen. \nWir konnten uns gut verständigen trotz unterschiedlicher Sprache.",
+          "ts": 1782070400,
+          "type": "text"
+        },
+        {
+          "bytes": 160446,
+          "file": "img_1782071140.jpg",
+          "fromMe": false,
+          "id": "1782071140-0",
+          "iso": "2026-06-21T19:45:40.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Fenster vom Wohnraum zur hinteren Strasse.",
+          "ts": 1782071140,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1782071152-0",
+          "iso": "2026-06-21T19:45:52.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": null,
+          "sender": "",
+          "text": "",
+          "ts": 1782071152,
+          "type": "text"
+        },
+        {
+          "bytes": 74421,
+          "file": "img_1782074251.jpg",
+          "fromMe": false,
+          "id": "1782074251-0",
+          "iso": "2026-06-21T20:37:31.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Ende Jahr 1990 war es soweit.",
+          "ts": 1782074251,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1782074335-0",
+          "iso": "2026-06-21T20:38:55.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": null,
+          "sender": "",
+          "text": "",
+          "ts": 1782074335,
+          "type": "text"
+        },
+        {
+          "fromMe": false,
+          "id": "1782074345-0",
+          "iso": "2026-06-21T20:39:05.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": null,
+          "sender": "",
+          "text": "",
+          "ts": 1782074345,
+          "type": "text"
+        },
+        {
+          "fromMe": false,
+          "id": "1782074976-0",
+          "iso": "2026-06-21T20:49:36.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": null,
+          "sender": "",
+          "text": "",
+          "ts": 1782074976,
+          "type": "text"
+        },
+        {
+          "bytes": 140786,
+          "file": "img_1782075381.jpg",
+          "fromMe": false,
+          "id": "1782075381-0",
+          "iso": "2026-06-21T20:56:21.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Jürg organisierte mir einen Übersetzer der mich zur Anwältin  mitnahm.",
+          "ts": 1782075381,
+          "type": "image"
+        },
+        {
+          "bytes": 94860,
+          "file": "img_1782075798.jpg",
+          "fromMe": false,
+          "id": "1782075798-0",
+          "iso": "2026-06-21T21:03:18.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Beim Unterschreiben.  Somit hatte ich einen HausGötti.",
+          "ts": 1782075798,
+          "type": "image"
+        },
+        {
+          "bytes": 133784,
+          "file": "img_1782076099.jpg",
+          "fromMe": false,
+          "id": "1782076099-0",
+          "iso": "2026-06-21T21:08:19.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Beim Unterscheiben. Das Haus ist gekauft.",
+          "ts": 1782076099,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1782077810-0",
+          "iso": "2026-06-21T21:36:50.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": null,
+          "sender": "",
+          "text": "Anfangs Jahr 1991 begleitete mich Hans nach Ermioni mit Material für Vermessungen vorzunehmen und einen Plan zuerstellen für die Arbeiter. Ich fotografierte drauf los. Notierte alle Veränderungen, die gemacht werden mussten. Die erste Material Einkäufe, die ich von der Schweiz transportieren wollte.",
+          "ts": 1782077810,
+          "type": "text"
+        },
+        {
+          "bytes": 179707,
+          "file": "img_1782078222.jpg",
+          "fromMe": false,
+          "id": "1782078222-0",
+          "iso": "2026-06-21T21:43:42.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Hans erster Arbeitstag.",
+          "ts": 1782078222,
+          "type": "image"
+        },
+        {
+          "bytes": 98889,
+          "file": "img_1782078364.jpg",
+          "fromMe": false,
+          "id": "1782078364-0",
+          "iso": "2026-06-21T21:46:04.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Hans beim Vermessen",
+          "ts": 1782078364,
+          "type": "image"
+        },
+        {
+          "bytes": 136970,
+          "file": "img_1782078601.jpg",
+          "fromMe": false,
+          "id": "1782078601-0",
+          "iso": "2026-06-21T21:50:01.000Z",
+          "jid": "41765073911@s.whatsapp.net",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "",
+          "text": "Hans macht erste Bekanntschaft mit Matina Notara.",
+          "ts": 1782078601,
+          "type": "image"
+        },
+        {
+          "bytes": 235951,
+          "file": "img_1782651347.jpg",
+          "fromMe": false,
+          "id": "1782651347-0",
+          "iso": "2026-06-28T12:55:47.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Mein Sanitari mit Gehilfe.",
+          "ts": 1782651347,
+          "type": "image"
+        },
+        {
+          "bytes": 235906,
+          "file": "img_1782651429.jpg",
+          "fromMe": false,
+          "id": "1782651429-0",
+          "iso": "2026-06-28T12:57:09.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782651429,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1782651576-0",
+          "iso": "2026-06-28T12:59:36.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erica Davatz-Baumann",
+          "text": "Ich fange mit der Kanalisation am. Während mehreren Jahren wurde mir beigebracht, dass ich mich darum nicht zu kümmern hätte. Ich wäre mit meinem Abwasser von der Küche, Duschraum mit Toilette mit meinen Nachbarn re. + li. angeschlossen. Ich hab nicht auf. Denn ich musste von meiner neu gebauten Terrasse mit Neuerrichtung von Wasserleitung den Anschluss im Höfli finden.\nMeine Handwerker halfen mir dabei. Mitte Höfli fanden wir das Gesuchte. Riesige Pflanzenkübel verdeckten die Kanalisation.",
+          "ts": 1782651576,
+          "type": "text"
+        },
+        {
+          "bytes": 385881,
+          "file": "img_1782652052.jpg",
+          "fromMe": false,
+          "id": "1782652052-0",
+          "iso": "2026-06-28T13:07:32.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Material für den Strassenbau hinter meinem Wohnbereich.",
+          "ts": 1782652052,
+          "type": "image"
+        },
+        {
+          "bytes": 360983,
+          "file": "img_1782652429.jpg",
+          "fromMe": false,
+          "id": "1782652429-0",
+          "iso": "2026-06-28T13:13:49.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Dieser Strassenteil wird li. zum Nachbar und re. zu meinem Haus geöffnet.",
+          "ts": 1782652429,
+          "type": "image"
+        },
+        {
+          "bytes": 358136,
+          "file": "img_1782652430.jpg",
+          "fromMe": false,
+          "id": "1782652430-0",
+          "iso": "2026-06-28T13:13:50.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782652430,
+          "type": "image"
+        },
+        {
+          "bytes": 215945,
+          "file": "img_1782653740.jpg",
+          "fromMe": false,
+          "id": "1782653740-0",
+          "iso": "2026-06-28T13:35:40.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782653740,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1782654207-0",
+          "iso": "2026-06-28T13:43:27.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erica Davatz-Baumann",
+          "text": "Öffnung der Strasse.",
+          "ts": 1782654207,
+          "type": "text"
+        },
+        {
+          "bytes": 384530,
+          "file": "img_1782655380.jpg",
+          "fromMe": false,
+          "id": "1782655380-0",
+          "iso": "2026-06-28T14:03:00.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Material wird verarbeitet.",
+          "ts": 1782655380,
+          "type": "image"
+        },
+        {
+          "bytes": 367545,
+          "file": "img_1782655424.jpg",
+          "fromMe": false,
+          "id": "1782655424-0",
+          "iso": "2026-06-28T14:03:44.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Ebenso",
+          "ts": 1782655424,
+          "type": "image"
+        },
+        {
+          "bytes": 294854,
+          "file": "img_1782655485.jpg",
+          "fromMe": false,
+          "id": "1782655485-0",
+          "iso": "2026-06-28T14:04:45.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782655485,
+          "type": "image"
+        },
+        {
+          "bytes": 307421,
+          "file": "img_1782656054.jpg",
+          "fromMe": false,
+          "id": "1782656054-0",
+          "iso": "2026-06-28T14:14:14.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Geteert danach betoniert.",
+          "ts": 1782656054,
+          "type": "image"
+        },
+        {
+          "bytes": 249801,
+          "file": "img_1782656056.jpg",
+          "fromMe": false,
+          "id": "1782656056-0",
+          "iso": "2026-06-28T14:14:16.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782656056,
+          "type": "image"
+        },
+        {
+          "bytes": 310239,
+          "file": "img_1782656057.jpg",
+          "fromMe": false,
+          "id": "1782656057-0",
+          "iso": "2026-06-28T14:14:17.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782656057,
+          "type": "image"
+        },
+        {
+          "bytes": 194571,
+          "file": "img_1782656281.jpg",
+          "fromMe": false,
+          "id": "1782656281-0",
+          "iso": "2026-06-28T14:18:01.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Betonierte Schuhe von Kosta",
+          "ts": 1782656281,
+          "type": "image"
+        },
+        {
+          "bytes": 231038,
+          "file": "img_1782656442.jpg",
+          "fromMe": false,
+          "id": "1782656442-0",
+          "iso": "2026-06-28T14:20:42.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Bis ins Detail perfekte Arbeit.",
+          "ts": 1782656442,
+          "type": "image"
+        },
+        {
+          "bytes": 435975,
+          "file": "img_1782656635.jpg",
+          "fromMe": false,
+          "id": "1782656635-0",
+          "iso": "2026-06-28T14:23:55.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Teerarbeiten.",
+          "ts": 1782656635,
+          "type": "image"
+        },
+        {
+          "bytes": 366978,
+          "file": "img_1782656769.jpg",
+          "fromMe": false,
+          "id": "1782656769-0",
+          "iso": "2026-06-28T14:26:09.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782656769,
+          "type": "image"
+        },
+        {
+          "bytes": 295841,
+          "file": "img_1782656942.jpg",
+          "fromMe": false,
+          "id": "1782656942-0",
+          "iso": "2026-06-28T14:29:02.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Perfekte Leistung .",
+          "ts": 1782656942,
+          "type": "image"
+        },
+        {
+          "fromMe": false,
+          "id": "1782658339-0",
+          "iso": "2026-06-28T14:52:19.000Z",
+          "jid": "161881780133908@lid",
+          "media": null,
+          "sender": "Erica Davatz-Baumann",
+          "text": "Du kannstauch welche Fotos löschen. Ich habe Unmengen.",
+          "ts": 1782658339,
+          "type": "text"
+        },
+        {
+          "bytes": 111848,
+          "file": "img_1782662200.jpg",
+          "fromMe": false,
+          "id": "1782662200-0",
+          "iso": "2026-06-28T15:56:40.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Nach der Strasse Renovierung wurde das Wohnzimmer renoviert. Denn, nach starken Regenfällen blieb das Wasser an der Mauer liegen bis zur Verdampfung. Somit war der Wohnbereich immer feucht.",
+          "ts": 1782662200,
+          "type": "image"
+        },
+        {
+          "bytes": 111848,
+          "file": "img_1782662303.jpg",
+          "fromMe": false,
+          "id": "1782662303-0",
+          "iso": "2026-06-28T15:58:23.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Wohnzimmer mit Chminée.  Neu.",
+          "ts": 1782662303,
+          "type": "image"
+        },
+        {
+          "bytes": 108549,
+          "file": "img_1782662342.jpg",
+          "fromMe": false,
+          "id": "1782662342-0",
+          "iso": "2026-06-28T15:59:02.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782662342,
+          "type": "image"
+        },
+        {
+          "bytes": 149273,
+          "file": "img_1782662385.jpg",
+          "fromMe": false,
+          "id": "1782662385-0",
+          "iso": "2026-06-28T15:59:45.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782662385,
+          "type": "image"
+        },
+        {
+          "bytes": 160868,
+          "file": "img_1782662408.jpg",
+          "fromMe": false,
+          "id": "1782662408-0",
+          "iso": "2026-06-28T16:00:08.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782662408,
+          "type": "image"
+        },
+        {
+          "bytes": 161103,
+          "file": "img_1782662430.jpg",
+          "fromMe": false,
+          "id": "1782662430-0",
+          "iso": "2026-06-28T16:00:30.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782662430,
+          "type": "image"
+        },
+        {
+          "bytes": 159853,
+          "file": "img_1782662707.jpg",
+          "fromMe": false,
+          "id": "1782662707-0",
+          "iso": "2026-06-28T16:05:07.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Vom Schreiner angefertigter Schrank unter die Wendeltreppe.",
+          "ts": 1782662707,
+          "type": "image"
+        },
+        {
+          "bytes": 148751,
+          "file": "img_1782663140.jpg",
+          "fromMe": false,
+          "id": "1782663140-0",
+          "iso": "2026-06-28T16:12:20.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Wendeltreppe mit Geländer. Sämtliche Nischen im ganzen Haus neu. Alle Fenster und Läden mit Mückengitter ausstaffiert.",
+          "ts": 1782663140,
+          "type": "image"
+        },
+        {
+          "bytes": 283646,
+          "file": "img_1782705550.jpg",
+          "fromMe": false,
+          "id": "1782705550-0",
+          "iso": "2026-06-29T03:59:10.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Die Hauswand zum Hauseingang hatte eine Tiefe v. 45 cm. War mit Mörtel und Bollensteine gebaut.'",
+          "ts": 1782705550,
+          "type": "image"
+        },
+        {
+          "bytes": 238953,
+          "file": "img_1782705867.jpg",
+          "fromMe": false,
+          "id": "1782705867-0",
+          "iso": "2026-06-29T04:04:27.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Sämtliche Hauskabel wurden in die Hauswand verlegt mit altem Elektrokasten.",
+          "ts": 1782705867,
+          "type": "image"
+        },
+        {
+          "bytes": 255350,
+          "file": "img_1782705969.jpg",
+          "fromMe": false,
+          "id": "1782705969-0",
+          "iso": "2026-06-29T04:06:09.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "",
+          "ts": 1782705969,
+          "type": "image"
+        },
+        {
+          "bytes": 219762,
+          "file": "img_1782706096.jpg",
+          "fromMe": false,
+          "id": "1782706096-0",
+          "iso": "2026-06-29T04:08:16.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "Hauseingangwand",
+          "ts": 1782706096,
+          "type": "image"
+        },
+        {
+          "bytes": 375501,
+          "file": "img_1782707227.jpg",
+          "fromMe": false,
+          "id": "1782707227-0",
+          "iso": "2026-06-29T04:27:07.000Z",
+          "jid": "161881780133908@lid",
+          "media": {
+            "mimetype": "image/jpeg"
+          },
+          "sender": "Erica Davatz-Baumann",
+          "text": "WC-Fenster und Elektrokasten.",
+          "ts": 1782707227,
+          "type": "image"
+        }
+      ],
+      "name": "Erica Baumann"
+    }
+  ],
   "me": {
     "id": "41792364544:62@s.whatsapp.net",
     "lid": "35425007730689:62@lid"
   },
-  "cutoff": 1782000000,
-  "outDir": "/tmp/erica_wa",
-  "matches": [
-    {
-      "jid": "41765073911@s.whatsapp.net",
-      "name": "Erica Baumann",
-      "count": 31,
-      "messages": [
-        {
-          "id": "1781762101-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781762101,
-          "iso": "2026-06-18T05:55:01.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "text",
-          "text": "Guten Tag lieber Zeno\nGerne treffe ich dich zu einem Gespräch, das der Verkauf von meinem Häuschen in Ermioni betrifft. \nBitte mach mir einen Vorschlag. \n           Grüsse aus Höngg\n           Erika",
-          "media": null
-        },
-        {
-          "id": "1781786702-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781786702,
-          "iso": "2026-06-18T12:45:02.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "1990 H.Besichtigung und gekauft.\nRe. Rotestor H.Eingang.\nWäsche der Nachbarn.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "001_image_1781786702_1.jpg",
-          "bytes": 127741
-        },
-        {
-          "id": "1781787149-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781787149,
-          "iso": "2026-06-18T12:52:29.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Abbruch von 2 kleinen Balkonen für Chminéeholz.\nLi. S. hinten Dusche m. WC. Re. Eingangstor.\nHeute geschlossener Duschraum.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "002_image_1781787149_2.jpg",
-          "bytes": 259458
-        },
-        {
-          "id": "1781787810-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781787810,
-          "iso": "2026-06-18T13:03:30.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Neuer TerrassenAufbau.\nNeuer doppelter Dach-\nIsolierung.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "003_image_1781787810_3.jpg",
-          "bytes": 219058
-        },
-        {
-          "id": "1781788081-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781788081,
-          "iso": "2026-06-18T13:08:01.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Anfertigung von zwei BalkonSeitenwände zu den Nachbarn.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "004_image_1781788081_4.jpg",
-          "bytes": 241371
-        },
-        {
-          "id": "1781790287-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781790287,
-          "iso": "2026-06-18T13:44:47.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "text",
-          "text": "Kommt noch einiges mehr. Auch von der Gasse und Wohnzimmer vor 5-6 Jahren.",
-          "media": null
-        },
-        {
-          "id": "1781790378-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781790378,
-          "iso": "2026-06-18T13:46:18.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "text",
-          "text": "Muss nun einen Unterbruch machen.",
-          "media": null
-        },
-        {
-          "id": "1781850804-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781850804,
-          "iso": "2026-06-19T06:33:24.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Alte Küche mit einem kleinen Fenster.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "000_image_1781850804_0.jpg",
-          "bytes": 129312
-        },
-        {
-          "id": "1781851423-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781851423,
-          "iso": "2026-06-19T06:43:43.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Hinter der Küche und Duschraum kam eine kurze Treppe vom Nachbarhaus in m. Haus.\nAusgeräumt, umfunktioniert zu einem geschlossenen Putzschrank.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "001_image_1781851423_1.jpg",
-          "bytes": 172954
-        },
-        {
-          "id": "1781851467-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781851467,
-          "iso": "2026-06-19T06:44:27.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "text",
-          "text": "",
-          "media": null
-        },
-        {
-          "id": "1781851998-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781851998,
-          "iso": "2026-06-19T06:53:18.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Durch einen kleinen Durchgang mit 2 grossen Bollensteine gelangte man\nIn Chminéeraum= Wohnraum.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "003_image_1781851998_3.jpg",
-          "bytes": 146440
-        },
-        {
-          "id": "1781852326-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781852326,
-          "iso": "2026-06-19T06:58:46.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Fenster zur zur hinteren Gasse.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "004_image_1781852326_4.jpg",
-          "bytes": 133044
-        },
-        {
-          "id": "1781852805-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781852805,
-          "iso": "2026-06-19T07:06:45.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Fenster im Wohnraum, Chminée, Sicht in einem Schacht zum Nachbar. Der mit grossen unvertigen grossen Haus.\nAnstelle vom Schacht wurde ein Kasten gebaut für Büroarbeiten.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "005_image_1781852805_5.jpg",
-          "bytes": 114662
-        },
-        {
-          "id": "1781852896-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781852896,
-          "iso": "2026-06-19T07:08:16.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Aufstieg in 1. Stock.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "006_image_1781852896_6.jpg",
-          "bytes": 120096
-        },
-        {
-          "id": "1781853460-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781853460,
-          "iso": "2026-06-19T07:17:40.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "image",
-          "text": "Oberhalb der Treppe befindet sich ein AtrappenFenster. Auf passen beim Aufstieg.\n„Dunkelheit“. Böden wurden im ganzen erneuert.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "007_image_1781853460_7.jpg",
-          "bytes": 144073
-        },
-        {
-          "id": "1781853991-0",
-          "jid": "161881780133908@lid",
-          "ts": 1781853991,
-          "iso": "2026-06-19T07:26:31.000Z",
-          "fromMe": false,
-          "sender": "Erika Baumann",
-          "type": "text",
-          "text": "Entschuldige, habe beim durchlesen einige Flüchtigkeitsfehler entdeckt. \n            Am Nachmittag geht es weiter.",
-          "media": null
-        },
-        {
-          "id": "1782068287-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782068287,
-          "iso": "2026-06-21T18:58:07.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "text",
-          "text": "",
-          "media": null
-        },
-        {
-          "id": "1782070400-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782070400,
-          "iso": "2026-06-21T19:33:20.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "text",
-          "text": "Zu meinem anderen Nachbar mit kl. Haus. Hauseingang zur Strasse. \nDas Haus hat er geerbt.\nAls ehemaliger Schiffsingenieur war sein Wunsch selbstständig einige Reparaturen am Haus zu machen. \nWir konnten uns gut verständigen trotz unterschiedlicher Sprache.",
-          "media": null
-        },
-        {
-          "id": "1782071140-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782071140,
-          "iso": "2026-06-21T19:45:40.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Fenster vom Wohnraum zur hinteren Strasse.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782071140.jpg",
-          "bytes": 160446
-        },
-        {
-          "id": "1782071152-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782071152,
-          "iso": "2026-06-21T19:45:52.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "text",
-          "text": "",
-          "media": null
-        },
-        {
-          "id": "1782074251-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782074251,
-          "iso": "2026-06-21T20:37:31.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Ende Jahr 1990 war es soweit.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782074251.jpg",
-          "bytes": 74421
-        },
-        {
-          "id": "1782074335-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782074335,
-          "iso": "2026-06-21T20:38:55.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "text",
-          "text": "",
-          "media": null
-        },
-        {
-          "id": "1782074345-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782074345,
-          "iso": "2026-06-21T20:39:05.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "text",
-          "text": "",
-          "media": null
-        },
-        {
-          "id": "1782074976-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782074976,
-          "iso": "2026-06-21T20:49:36.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "text",
-          "text": "",
-          "media": null
-        },
-        {
-          "id": "1782075381-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782075381,
-          "iso": "2026-06-21T20:56:21.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Jürg organisierte mir einen Übersetzer der mich zur Anwältin  mitnahm.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782075381.jpg",
-          "bytes": 140786
-        },
-        {
-          "id": "1782075798-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782075798,
-          "iso": "2026-06-21T21:03:18.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Beim Unterschreiben.  Somit hatte ich einen HausGötti.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782075798.jpg",
-          "bytes": 94860
-        },
-        {
-          "id": "1782076099-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782076099,
-          "iso": "2026-06-21T21:08:19.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Beim Unterscheiben. Das Haus ist gekauft.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782076099.jpg",
-          "bytes": 133784
-        },
-        {
-          "id": "1782077810-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782077810,
-          "iso": "2026-06-21T21:36:50.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "text",
-          "text": "Anfangs Jahr 1991 begleitete mich Hans nach Ermioni mit Material für Vermessungen vorzunehmen und einen Plan zuerstellen für die Arbeiter. Ich fotografierte drauf los. Notierte alle Veränderungen, die gemacht werden mussten. Die erste Material Einkäufe, die ich von der Schweiz transportieren wollte.",
-          "media": null
-        },
-        {
-          "id": "1782078222-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782078222,
-          "iso": "2026-06-21T21:43:42.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Hans erster Arbeitstag.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782078222.jpg",
-          "bytes": 179707
-        },
-        {
-          "id": "1782078364-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782078364,
-          "iso": "2026-06-21T21:46:04.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Hans beim Vermessen",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782078364.jpg",
-          "bytes": 98889
-        },
-        {
-          "id": "1782078601-0",
-          "jid": "41765073911@s.whatsapp.net",
-          "ts": 1782078601,
-          "iso": "2026-06-21T21:50:01.000Z",
-          "fromMe": false,
-          "sender": "",
-          "type": "image",
-          "text": "Hans macht erste Bekanntschaft mit Matina Notara.",
-          "media": {
-            "mimetype": "image/jpeg"
-          },
-          "file": "img_1782078601.jpg",
-          "bytes": 136970
-        }
-      ]
-    }
-  ]
+  "outDir": "/tmp/erica_wa"
 }

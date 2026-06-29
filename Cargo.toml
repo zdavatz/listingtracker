@@ -19,6 +19,10 @@ path = "src/geoland_recent_listings.rs"
 name = "baugeschichte"
 path = "src/baugeschichte.rs"
 
+[[bin]]
+name = "wa_export"
+path = "src/wa_export.rs"
+
 [dependencies]
 anyhow = "1"
 base64 = "0.22"

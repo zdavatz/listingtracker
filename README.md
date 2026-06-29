@@ -111,6 +111,27 @@ The cover carries the house's **clickable** Google Maps location and goutos.gr
 listing links. genpdf can't emit hyperlinks, so the finished PDF is reopened
 with `lopdf` and `/Link` URI annotations are overlaid on the two URL lines.
 
+### `wa_export`
+
+Update the Baugeschichte with new WhatsApp messages **without** any live
+WhatsApp connection. Export the chat from the phone (WhatsApp → the chat →
+*Export Chat* → *Attach Media*), drop the unzipped folder into
+`erica-house/sync/import/`, then:
+
+```
+cargo run --release --bin wa_export -- --dry-run   # preview what would merge
+cargo run --release --bin wa_export                # merge + copy new photos
+cargo run --release --bin baugeschichte -- --lang both
+```
+
+Pure Rust: parses the iOS `_chat.txt` format, converts the Europe/Zurich
+timestamps to UTC, and appends only messages newer than the newest already in
+`erica-house/messages.json` (idempotent; `--since <epoch>` / `--all` override
+the floor). New photos are copied in as `img_<ts>.jpg`; videos/PDFs and
+deleted/system messages are skipped. New Greek captions still need a `TR` entry
+in `baugeschichte.rs`. See `erica-house/sync/` for the (flaky, fallback) live
+Baileys fetcher and the full rationale.
+
 ## What we've learned about goutos.gr (e-agents CMS)
 
 The HTML for a listing carries **no** date metadata: no `Last-Modified`, no

@@ -17,6 +17,7 @@ cargo run --release --bin inspect_listing -- <url>
 cargo run --release --bin recent_listings -- [--area <id>] [--pages <n>] [--top <n>] [--sort latest|price-asc]
 cargo run --release --bin geoland_recent_listings -- [--area <id>] [--top <n>] [--sort latest|price-asc] [--sale-only|--rent-only]
 cargo run --release --bin baugeschichte -- [--lang de|el|both]
+cargo run --release --bin wa_export -- [--import <dir>] [--since <epoch>] [--all] [--dry-run]
 ```
 
 The `*_recent_listings` binaries require headless Chrome to print PDFs. They look at
@@ -177,6 +178,52 @@ Non-obvious gotchas:
 - **DPI = fit, not quality.** `dpi_for` picks the DPI that makes a photo fit the
   printable box (cap on the more constraining dimension), so genpdf scales it
   down to the page rather than rendering at native size.
+
+- **Greek edition completeness.** Every new caption/note added to
+  `messages.json` must get a `TR` entry in `baugeschichte.rs`, keyed by the
+  EXACT trimmed German text (preserve quirks: double spaces, trailing `'`,
+  embedded `\n`). Untranslated text falls through as German inside the Greek
+  PDF — silent but wrong. After a sync, translate the new strings and add them.
+
+### `src/wa_export.rs` — WhatsApp chat-export parser (pure Rust)
+
+Feeds `baugeschichte` by merging new messages from a WhatsApp **"Export Chat"**
+dump into `erica-house/messages.json`. This is the maintained, reliable
+alternative to live Baileys sync (see `erica-house/sync/` below): a chat export
+needs no pairing, no QR, no live protocol — just `_chat.txt` + media files — so
+the whole parse is Rust.
+
+- Parses the iOS/German export line format
+  `‎[DD.MM.YY, HH:MM:SS] Sender: text ‎<Anhang: FILE>` (English exports:
+  `<attached: …>`). Lines without a `[date, time]` header continue the previous
+  message. A leading U+200E (LTR mark) prefixes media lines and is stripped.
+- **Local time → UTC `ts`.** Export stamps are Europe/Zurich; we apply a fixed
+  `+02:00` (CEST) because every message we merge is summer-dated and the existing
+  `ts` values were computed at +02:00 (verified: `14:45:02` local ⇒
+  `ts 1781786702` ⇒ `12:45:02Z`). Revisit only if winter (CET) dates ever merge.
+  No `chrono-tz` dep on purpose.
+- **Idempotent merge.** Default floor = newest `ts` already in `messages.json`,
+  so only strictly-newer messages append (re-runs are no-ops). `--since <epoch>`
+  overrides the floor; `--all` rebuilds from scratch (rarely wanted — the export
+  is years of unrelated chat). `--dry-run` previews without writing/copying.
+- Only Erica's messages (`!fromMe`; `fromMe` = sender starts with "Zeno") are
+  merged. Images (`.jpg/.jpeg/.png`) are copied into `erica-house/` as
+  `img_<ts>.jpg` and recorded with `file`/`bytes`; videos/PDFs and
+  deleted/system messages ("wurde gelöscht", "Ende-zu-Ende-verschlüsselt") are
+  skipped. The top-level `me`/`cutoff`/`outDir` fields are preserved.
+
+### `erica-house/sync/` — WhatsApp fetchers (Node + Baileys)
+
+Self-contained Node stack kept in-repo so the whole Erica-house pipeline lives
+here. `read-erica.mjs` is a live fetcher (Baileys v7) supporting QR or
+`--pair <number>` (pairing code) linking, inline media download, and on-demand
+history fetch; it emits the `messages.json` shape. **In practice live sync is
+flaky** in a headless/desynced-session context (a warm reconnect emits no
+`messaging-history.set`; a stale session shows "Bad MAC" on every message; QR
+codes rotate faster than they can be relayed). **Prefer the export-chat →
+`wa_export` path.** `node_modules/`, `auth/` and the raw `import/` drop (large —
+videos + originals) are gitignored; the source of truth committed to the repo is
+`erica-house/messages.json` + the `img_*.jpg` plates.
 
 ## Domain knowledge — non-obvious
 

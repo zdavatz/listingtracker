@@ -1,0 +1,6 @@
+node_modules/
+auth/
+package-lock.json
+
+# raw WhatsApp export drop (videos/originals — large, not source of truth)
+import/
