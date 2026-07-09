@@ -7,9 +7,10 @@
 // Greek + umlauts) and the photos. Replaces the earlier HTML+Chrome / Node
 // pipeline.
 //
-//   cargo run --release --bin baugeschichte                 # both DE + EL
-//   cargo run --release --bin baugeschichte -- --lang de    # German only
-//   cargo run --release --bin baugeschichte -- --lang el    # Greek only
+//   cargo run --release --bin baugeschichte                    # both DE + EL
+//   cargo run --release --bin baugeschichte -- --lang de       # German only
+//   cargo run --release --bin baugeschichte -- --lang el       # Greek only
+//   cargo run --release --bin baugeschichte -- --images-only   # cover + photos, no captions
 //
 // Font dir override: $FONT_DIR (default /usr/share/fonts/dejavu).
 
@@ -31,6 +32,10 @@ const DEFAULT_FONT_DIR: &str = "/usr/share/fonts/dejavu";
 // width).
 const MAX_IMG_W_MM: f64 = 168.0;
 const MAX_IMG_H_MM: f64 = 180.0;
+
+// In --images-only mode the plate page carries no label/caption, so the photo
+// may use nearly the full printable height (A4 297 − 2×18 mm margins = 261 mm).
+const MAX_IMG_H_IMAGES_ONLY_MM: f64 = 250.0;
 
 // printpdf 0.3 (used by genpdf) embeds photos as a raster, so PDF size scales
 // with pixel count, not the source JPEG bytes. Downscale to ~150 dpi at full
@@ -256,9 +261,9 @@ fn push_lines(doc: &mut genpdf::Document, text: &str, style: Style, align: Align
 
 /// DPI that makes a photo of the given pixel size fit inside the printable box
 /// (cap on the more constraining dimension), so genpdf scales it to fit.
-fn dpi_for(w: u32, h: u32) -> f64 {
+fn dpi_for(w: u32, h: u32, max_h_mm: f64) -> f64 {
     let dpi_w = w as f64 * 25.4 / MAX_IMG_W_MM;
-    let dpi_h = h as f64 * 25.4 / MAX_IMG_H_MM;
+    let dpi_h = h as f64 * 25.4 / max_h_mm;
     dpi_w.max(dpi_h).max(72.0)
 }
 
@@ -301,6 +306,65 @@ fn load_font_family(font_dir: &str) -> Result<genpdf::fonts::FontFamily<genpdf::
     })
 }
 
+/// Cover page: kicker, title, place, lead and the two URL lines (Maps +
+/// listing), ending with a PageBreak. Shared by the full editions and
+/// --images-only; the URL lines get clickable annotations via
+/// add_cover_links() after rendering.
+fn push_cover(doc: &mut genpdf::Document, lang: Lang, name: &str) {
+    // Generous vertical breaks between the title lines: pushing two large
+    // paragraphs back-to-back makes the title look squashed.
+    doc.push(Break::new(6.0));
+    push_lines(
+        doc,
+        lang.kicker(),
+        Style::new().with_color(GOLD).with_font_size(11).bold(),
+        Alignment::Center,
+    );
+    doc.push(Break::new(2.5));
+    push_lines(
+        doc,
+        lang.house_of(),
+        Style::new().with_color(BROWN).with_font_size(19),
+        Alignment::Center,
+    );
+    doc.push(Break::new(1.6));
+    push_lines(
+        doc,
+        name,
+        Style::new().with_color(INK).with_font_size(32).bold(),
+        Alignment::Center,
+    );
+    doc.push(Break::new(2.0));
+    push_lines(
+        doc,
+        lang.place(),
+        Style::new().with_color(BROWN).with_font_size(14).italic(),
+        Alignment::Center,
+    );
+    doc.push(Break::new(2.5));
+    push_lines(
+        doc,
+        lang.lead(),
+        Style::new().with_color(BROWN).with_font_size(11),
+        Alignment::Center,
+    );
+    doc.push(Break::new(2.0));
+    push_lines(
+        doc,
+        &format!("{}: {}", lang.location_label(), MAPS_URL),
+        Style::new().with_color(BROWN).with_font_size(COVER_LINK_FONT_SIZE),
+        Alignment::Center,
+    );
+    doc.push(Break::new(0.4));
+    push_lines(
+        doc,
+        &format!("{}: {}", lang.listing_label(), LISTING_URL),
+        Style::new().with_color(BROWN).with_font_size(COVER_LINK_FONT_SIZE),
+        Alignment::Center,
+    );
+    doc.push(PageBreak::new());
+}
+
 fn render(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<PathBuf> {
     let family = load_font_family(font_dir)?;
     let mut doc = genpdf::Document::new(family);
@@ -329,60 +393,7 @@ fn render(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<
         .filter(|m| file_of(m).is_none() && !text_of(m).trim().is_empty())
         .collect();
 
-    // --- Cover ---
-    // Generous vertical breaks between the title lines: pushing two large
-    // paragraphs back-to-back makes the title look squashed.
-    doc.push(Break::new(6.0));
-    push_lines(
-        &mut doc,
-        lang.kicker(),
-        Style::new().with_color(GOLD).with_font_size(11).bold(),
-        Alignment::Center,
-    );
-    doc.push(Break::new(2.5));
-    push_lines(
-        &mut doc,
-        lang.house_of(),
-        Style::new().with_color(BROWN).with_font_size(19),
-        Alignment::Center,
-    );
-    doc.push(Break::new(1.6));
-    push_lines(
-        &mut doc,
-        name,
-        Style::new().with_color(INK).with_font_size(32).bold(),
-        Alignment::Center,
-    );
-    doc.push(Break::new(2.0));
-    push_lines(
-        &mut doc,
-        lang.place(),
-        Style::new().with_color(BROWN).with_font_size(14).italic(),
-        Alignment::Center,
-    );
-    doc.push(Break::new(2.5));
-    push_lines(
-        &mut doc,
-        lang.lead(),
-        Style::new().with_color(BROWN).with_font_size(11),
-        Alignment::Center,
-    );
-    doc.push(Break::new(2.0));
-    push_lines(
-        &mut doc,
-        &format!("{}: {}", lang.location_label(), MAPS_URL),
-        Style::new().with_color(BROWN).with_font_size(COVER_LINK_FONT_SIZE),
-        Alignment::Center,
-    );
-    doc.push(Break::new(0.4));
-    push_lines(
-        &mut doc,
-        &format!("{}: {}", lang.listing_label(), LISTING_URL),
-        Style::new().with_color(BROWN).with_font_size(COVER_LINK_FONT_SIZE),
-        Alignment::Center,
-    );
-    doc.push(PageBreak::new());
-
+    push_cover(&mut doc, lang, name);
     // --- Intro ---
     if let Some(first) = text_notes.first() {
         let intro = translate(lang, &text_of(first));
@@ -423,7 +434,7 @@ fn render(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<
         let img = Image::from_reader(Cursor::new(jpeg))
             .map_err(|e| anyhow!("load image {}: {}", path.display(), e))?
             .with_alignment(Alignment::Center)
-            .with_dpi(dpi_for(fw, fh));
+            .with_dpi(dpi_for(fw, fh, MAX_IMG_H_MM));
         doc.push(img);
 
         let cap = translate(lang, text_of(p).trim());
@@ -480,6 +491,61 @@ fn render(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<
     // onto the two cover URL lines as a post-process step.
     let added = add_cover_links(&pdf_path)?;
     eprintln!("wrote {} ({} clickable cover links)", pdf_path.display(), added);
+    Ok(pdf_path)
+}
+
+/// Cover page plus photos — no plate labels, no captions, no intro/closing
+/// note. One photo per page: erica-house/baugeschichte_bilder.pdf. The cover
+/// (the only text) uses `lang`.
+fn render_images_only(lang: Lang, name: &str, messages: &[Value], font_dir: &str) -> Result<PathBuf> {
+    let family = load_font_family(font_dir)?;
+    let mut doc = genpdf::Document::new(family);
+    doc.set_title(format!("Baugeschichte – {} (Bilder)", name));
+    doc.set_minimal_conformance();
+    let mut deco = genpdf::SimplePageDecorator::new();
+    deco.set_margins(18);
+    doc.set_page_decorator(deco);
+
+    push_cover(&mut doc, lang, name);
+
+    let mut hers: Vec<&Value> = messages
+        .iter()
+        .filter(|m| !m.get("fromMe").and_then(Value::as_bool).unwrap_or(false))
+        .collect();
+    hers.sort_by_key(|m| m.get("ts").and_then(Value::as_i64).unwrap_or(0));
+
+    let mut count = 0usize;
+    for m in hers {
+        let Some(file) = m.get("file").and_then(Value::as_str) else {
+            continue;
+        };
+        if !is_image(file) {
+            continue;
+        }
+        let path = Path::new(DIR).join(file);
+        if count > 0 {
+            doc.push(PageBreak::new());
+        }
+        count += 1;
+
+        let (jpeg, fw, fh) = scaled_jpeg(&path)?;
+        let img = Image::from_reader(Cursor::new(jpeg))
+            .map_err(|e| anyhow!("load image {}: {}", path.display(), e))?
+            .with_alignment(Alignment::Center)
+            .with_dpi(dpi_for(fw, fh, MAX_IMG_H_IMAGES_ONLY_MM));
+        doc.push(img);
+    }
+
+    let pdf_path = PathBuf::from(DIR).join("baugeschichte_bilder.pdf");
+    doc.render_to_file(&pdf_path)
+        .map_err(|e| anyhow!("render {}: {}", pdf_path.display(), e))?;
+    let added = add_cover_links(&pdf_path)?;
+    eprintln!(
+        "wrote {} ({} photos, {} clickable cover links)",
+        pdf_path.display(),
+        count,
+        added
+    );
     Ok(pdf_path)
 }
 
@@ -583,6 +649,7 @@ fn add_cover_links(pdf_path: &Path) -> Result<usize> {
 
 fn main() -> Result<()> {
     let mut langs = vec![Lang::De, Lang::El];
+    let mut images_only = false;
     let mut args = env::args().skip(1);
     while let Some(a) = args.next() {
         match a.as_str() {
@@ -595,8 +662,9 @@ fn main() -> Result<()> {
                     other => anyhow::bail!("unknown --lang {} (use de|el|both)", other),
                 };
             }
+            "--images-only" => images_only = true,
             "-h" | "--help" => {
-                println!("baugeschichte [--lang de|el|both]");
+                println!("baugeschichte [--lang de|el|both] [--images-only]");
                 return Ok(());
             }
             other => anyhow::bail!("unknown arg {}", other),
@@ -616,6 +684,11 @@ fn main() -> Result<()> {
         .and_then(Value::as_array)
         .ok_or_else(|| anyhow!("matches[0].messages is not an array"))?;
 
+    if images_only {
+        // Cover text follows --lang; the default (both) means a German cover.
+        render_images_only(langs[0], name, messages, &font_dir)?;
+        return Ok(());
+    }
     for lang in langs {
         render(lang, name, messages, &font_dir)?;
     }

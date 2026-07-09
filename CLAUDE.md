@@ -16,7 +16,7 @@ cargo build --release
 cargo run --release --bin inspect_listing -- <url>
 cargo run --release --bin recent_listings -- [--area <id>] [--pages <n>] [--top <n>] [--sort latest|price-asc]
 cargo run --release --bin geoland_recent_listings -- [--area <id>] [--top <n>] [--sort latest|price-asc] [--sale-only|--rent-only]
-cargo run --release --bin baugeschichte -- [--lang de|el|both]
+cargo run --release --bin baugeschichte -- [--lang de|el|both] [--images-only]
 cargo run --release --bin wa_export -- [--import <dir>] [--since <epoch>] [--all] [--dry-run]
 ```
 
@@ -134,6 +134,11 @@ Unrelated to listing scraping: turns the WhatsApp messages Erica Baumann sent
 about buying and rebuilding her house in Ermioni (synced into
 `erica-house/messages.json` by the pegelstand WhatsApp toolchain) into a titled
 photo book — German (`baugeschichte.pdf`) and Greek (`baugeschichte_gr.pdf`).
+`--images-only` instead renders `baugeschichte_bilder.pdf`: the cover (with
+the two clickable Maps/listing links; cover language = first `--lang` value,
+German by default) followed by photos only, one per page — no labels, captions
+or intro/closing notes. Without text on the plate pages the photo may fill
+almost the full height (`MAX_IMG_H_IMAGES_ONLY_MM`).
 
 Pipeline:
 
