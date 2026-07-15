@@ -90,22 +90,24 @@ goutos's 190.
 ### `baugeschichte`
 
 Render the "Baugeschichte" (building history) of Erica's house in Ermioni from
-synced WhatsApp data into a photo-documentation PDF — German and Greek. Unlike
-the catalog binaries, this one is **pure Rust, no Chrome**: the PDF is built
-directly with `genpdf` (DejaVu Sans embedded for Latin + Greek glyphs), one
+synced WhatsApp data into a photo-documentation PDF — German, Greek and English.
+Unlike the catalog binaries, this one is **pure Rust, no Chrome**: the PDF is
+built directly with `genpdf` (DejaVu Sans embedded for Latin + Greek glyphs), one
 photo per page so tall portrait shots never overflow.
 
 ```
 cargo run --release --bin baugeschichte                 # both DE + EL
 cargo run --release --bin baugeschichte -- --lang de    # German only
 cargo run --release --bin baugeschichte -- --lang el    # Greek only
+cargo run --release --bin baugeschichte -- --lang en    # English only
+cargo run --release --bin baugeschichte -- --lang all   # DE + EL + EN
 ```
 
 Reads `erica-house/messages.json` plus the photos in `erica-house/`, writes
-`erica-house/baugeschichte.pdf` and `erica-house/baugeschichte_gr.pdf`. Font
-dir override: `FONT_DIR=` (default `/usr/share/fonts/dejavu`). The German →
-Greek translation of the cover, intro, captions and closing note lives as a
-static map in the binary.
+`erica-house/baugeschichte.pdf`, `erica-house/baugeschichte_gr.pdf` and
+`erica-house/baugeschichte_en.pdf`. Font dir override: `FONT_DIR=` (default
+`/usr/share/fonts/dejavu`). The German → Greek / English translation of the
+cover, intro, captions and closing note lives as a static table in the binary.
 
 The cover carries the house's **clickable** Google Maps location and goutos.gr
 listing links. genpdf can't emit hyperlinks, so the finished PDF is reopened
@@ -128,8 +130,8 @@ Pure Rust: parses the iOS `_chat.txt` format, converts the Europe/Zurich
 timestamps to UTC, and appends only messages newer than the newest already in
 `erica-house/messages.json` (idempotent; `--since <epoch>` / `--all` override
 the floor). New photos are copied in as `img_<ts>.jpg`; videos/PDFs and
-deleted/system messages are skipped. New Greek captions still need a `TR` entry
-in `baugeschichte.rs`. See `erica-house/sync/` for the (flaky, fallback) live
+deleted/system messages are skipped. New captions still need a `TR` row (Greek +
+English) in `baugeschichte.rs`. See `erica-house/sync/` for the (flaky, fallback) live
 Baileys fetcher and the full rationale.
 
 ## What we've learned about goutos.gr (e-agents CMS)

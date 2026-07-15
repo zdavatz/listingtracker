@@ -1,6 +1,6 @@
 // Render the "Baugeschichte" (building history) of Erica's house in Ermioni
 // from the synced WhatsApp data in erica-house/messages.json into a titled
-// photo-documentation PDF — German and Greek.
+// photo-documentation PDF — German, Greek and English.
 //
 // Pure Rust, no Chrome: the PDF is built directly with `genpdf` (which writes
 // PDF via printpdf), embedding the DejaVu Sans font family (covers Latin +
@@ -10,6 +10,8 @@
 //   cargo run --release --bin baugeschichte                    # both DE + EL
 //   cargo run --release --bin baugeschichte -- --lang de       # German only
 //   cargo run --release --bin baugeschichte -- --lang el       # Greek only
+//   cargo run --release --bin baugeschichte -- --lang en       # English only
+//   cargo run --release --bin baugeschichte -- --lang all      # DE + EL + EN
 //   cargo run --release --bin baugeschichte -- --images-only   # cover + photos, no captions
 //
 // Font dir override: $FONT_DIR (default /usr/share/fonts/dejavu).
@@ -63,6 +65,7 @@ const INK: Color = Color::Rgb(0x1f, 0x1a, 0x16);
 enum Lang {
     De,
     El,
+    En,
 }
 
 impl Lang {
@@ -70,54 +73,63 @@ impl Lang {
         match self {
             Lang::De => "",    // baugeschichte.pdf
             Lang::El => "_gr", // baugeschichte_gr.pdf
+            Lang::En => "_en", // baugeschichte_en.pdf
         }
     }
     fn kicker(self) -> &'static str {
         match self {
             Lang::De => "BAUGESCHICHTE IN BILDERN",
             Lang::El => "Η ΙΣΤΟΡΙΑ ΤΗΣ ΚΑΤΑΣΚΕΥΗΣ ΣΕ ΕΙΚΟΝΕΣ",
+            Lang::En => "BUILDING HISTORY IN PICTURES",
         }
     }
     fn house_of(self) -> &'static str {
         match self {
             Lang::De => "Das Haus von",
             Lang::El => "Το σπίτι της",
+            Lang::En => "The House of",
         }
     }
     fn place(self) -> &'static str {
         match self {
             Lang::De => "Ermioni, Griechenland",
             Lang::El => "Ερμιόνη, Ελλάδα",
+            Lang::En => "Ermioni, Greece",
         }
     }
     fn lead(self) -> &'static str {
         match self {
             Lang::De => "Vom Kauf im Jahr 1990 bis zu den späteren Umbauten — eine fotografische Dokumentation der Veränderungen über die Jahre.",
             Lang::El => "Από την αγορά το 1990 έως τις μετέπειτα μετατροπές — μια φωτογραφική τεκμηρίωση των αλλαγών στο πέρασμα των χρόνων.",
+            Lang::En => "From the purchase in 1990 to the later conversions — a photographic documentation of the changes over the years.",
         }
     }
     fn intro_heading(self) -> &'static str {
         match self {
             Lang::De => "Zur Geschichte des Hauses",
             Lang::El => "Η ιστορία του σπιτιού",
+            Lang::En => "The Story of the House",
         }
     }
     fn plate_word(self) -> &'static str {
         match self {
             Lang::De => "BILD",
             Lang::El => "ΕΙΚΟΝΑ",
+            Lang::En => "PLATE",
         }
     }
     fn location_label(self) -> &'static str {
         match self {
             Lang::De => "Ort",
             Lang::El => "Τοποθεσία",
+            Lang::En => "Location",
         }
     }
     fn listing_label(self) -> &'static str {
         match self {
             Lang::De => "Inserat",
             Lang::El => "Αγγελία",
+            Lang::En => "Listing",
         }
     }
     fn footer(self, name: &str) -> String {
@@ -130,103 +142,156 @@ impl Lang {
                 "Συντάχθηκε από τις εικόνες και τις περιγραφές της {} · Σπίτι στην Ερμιόνη",
                 name
             ),
+            Lang::En => format!(
+                "Compiled from the pictures and descriptions of {} · House in Ermioni",
+                name
+            ),
         }
     }
 }
 
-// German original (trimmed) -> Greek. Mirrors the TR map in pdf-generator-gr.mjs.
-const TR: &[(&str, &str)] = &[
+// German original (trimmed) -> (Greek, English). One row per caption/note; both
+// translations live side-by-side so they can't drift out of sync. Keyed by the
+// EXACT trimmed German (preserve quirks: double spaces, trailing ', embedded
+// \n). Unmapped German falls through unchanged in every non-German edition —
+// silent but wrong — so every new caption in messages.json needs a row here.
+const TR: &[(&str, &str, &str)] = &[
     ("Guten Tag lieber Zeno\nGerne treffe ich dich zu einem Gespräch, das der Verkauf von meinem Häuschen in Ermioni betrifft. \nBitte mach mir einen Vorschlag. \n           Grüsse aus Höngg\n           Erika",
-     "Καλημέρα αγαπητέ Ζένο\nΜε χαρά θα σε συναντήσω για μια συζήτηση που αφορά την πώληση του σπιτιού μου στην Ερμιόνη. \nΣε παρακαλώ κάνε μου μια πρόταση. \n           Χαιρετίσματα από το Höngg\n           Έρικα"),
+     "Καλημέρα αγαπητέ Ζένο\nΜε χαρά θα σε συναντήσω για μια συζήτηση που αφορά την πώληση του σπιτιού μου στην Ερμιόνη. \nΣε παρακαλώ κάνε μου μια πρόταση. \n           Χαιρετίσματα από το Höngg\n           Έρικα",
+     "Good day dear Zeno\nI would gladly meet you for a talk concerning the sale of my little house in Ermioni. \nPlease make me a proposal. \n           Greetings from Höngg\n           Erika"),
     ("Kommt noch einiges mehr. Auch von der Gasse und Wohnzimmer vor 5-6 Jahren.",
-     "Θα ακολουθήσουν κι άλλα. Επίσης από το σοκάκι και το σαλόνι πριν από 5-6 χρόνια."),
+     "Θα ακολουθήσουν κι άλλα. Επίσης από το σοκάκι και το σαλόνι πριν από 5-6 χρόνια.",
+     "A good deal more is still to come. Also of the alley and the living room from 5-6 years ago."),
     ("Muss nun einen Unterbruch machen.",
-     "Πρέπει τώρα να κάνω ένα διάλειμμα."),
+     "Πρέπει τώρα να κάνω ένα διάλειμμα.",
+     "I have to take a break now."),
     ("Entschuldige, habe beim durchlesen einige Flüchtigkeitsfehler entdeckt. \n            Am Nachmittag geht es weiter.",
-     "Συγγνώμη, διαβάζοντας ξανά εντόπισα μερικά λαθάκια απροσεξίας. \n            Το απόγευμα συνεχίζουμε."),
+     "Συγγνώμη, διαβάζοντας ξανά εντόπισα μερικά λαθάκια απροσεξίας. \n            Το απόγευμα συνεχίζουμε.",
+     "Sorry, while reading through I spotted a few careless slips. \n            It carries on in the afternoon."),
     ("Zu meinem anderen Nachbar mit kl. Haus. Hauseingang zur Strasse. \nDas Haus hat er geerbt.\nAls ehemaliger Schiffsingenieur war sein Wunsch selbstständig einige Reparaturen am Haus zu machen. \nWir konnten uns gut verständigen trotz unterschiedlicher Sprache.",
-     "Σχετικά με τον άλλο μου γείτονα με το μικρό σπίτι. Η είσοδος του σπιτιού προς τον δρόμο. \nΤο σπίτι το κληρονόμησε.\nΩς πρώην μηχανικός πλοίων, επιθυμία του ήταν να κάνει μόνος του κάποιες επισκευές στο σπίτι. \nΜπορούσαμε να συνεννοηθούμε καλά παρά τη διαφορετική γλώσσα."),
+     "Σχετικά με τον άλλο μου γείτονα με το μικρό σπίτι. Η είσοδος του σπιτιού προς τον δρόμο. \nΤο σπίτι το κληρονόμησε.\nΩς πρώην μηχανικός πλοίων, επιθυμία του ήταν να κάνει μόνος του κάποιες επισκευές στο σπίτι. \nΜπορούσαμε να συνεννοηθούμε καλά παρά τη διαφορετική γλώσσα.",
+     "About my other neighbour with the small house. House entrance onto the street. \nHe inherited the house.\nAs a former ship's engineer, his wish was to carry out some repairs on the house himself. \nWe could understand each other well despite the different language."),
     ("Anfangs Jahr 1991 begleitete mich Hans nach Ermioni mit Material für Vermessungen vorzunehmen und einen Plan zuerstellen für die Arbeiter. Ich fotografierte drauf los. Notierte alle Veränderungen, die gemacht werden mussten. Die erste Material Einkäufe, die ich von der Schweiz transportieren wollte.",
-     "Στις αρχές του 1991 με συνόδευσε ο Χανς στην Ερμιόνη με υλικά, για να κάνουμε μετρήσεις και να ετοιμάσουμε ένα σχέδιο για τους εργάτες. Φωτογράφιζα ασταμάτητα. Σημείωνα όλες τις αλλαγές που έπρεπε να γίνουν. Τις πρώτες αγορές υλικών που ήθελα να μεταφέρω από την Ελβετία."),
+     "Στις αρχές του 1991 με συνόδευσε ο Χανς στην Ερμιόνη με υλικά, για να κάνουμε μετρήσεις και να ετοιμάσουμε ένα σχέδιο για τους εργάτες. Φωτογράφιζα ασταμάτητα. Σημείωνα όλες τις αλλαγές που έπρεπε να γίνουν. Τις πρώτες αγορές υλικών που ήθελα να μεταφέρω από την Ελβετία.",
+     "At the start of 1991 Hans came with me to Ermioni with material to take measurements and draw up a plan for the workers. I snapped away with the camera. Noted down every change that had to be made. The first purchases of material that I wanted to transport from Switzerland."),
     ("1990 H.Besichtigung und gekauft.\nRe. Rotestor H.Eingang.\nWäsche der Nachbarn.",
-     "1990 Επίσκεψη και αγορά του σπιτιού.\nΔεξιά κόκκινη πύλη, είσοδος του σπιτιού.\nΜπουγάδα των γειτόνων."),
+     "1990 Επίσκεψη και αγορά του σπιτιού.\nΔεξιά κόκκινη πύλη, είσοδος του σπιτιού.\nΜπουγάδα των γειτόνων.",
+     "1990 House viewing and bought.\nRight: red gate, house entrance.\nThe neighbours' washing."),
     ("Abbruch von 2 kleinen Balkonen für Chminéeholz.\nLi. S. hinten Dusche m. WC. Re. Eingangstor.\nHeute geschlossener Duschraum.",
-     "Κατεδάφιση 2 μικρών μπαλκονιών για ξύλα του τζακιού.\nΑριστερά πίσω ντους με WC. Δεξιά η πύλη εισόδου.\nΣήμερα κλειστός χώρος ντους."),
+     "Κατεδάφιση 2 μικρών μπαλκονιών για ξύλα του τζακιού.\nΑριστερά πίσω ντους με WC. Δεξιά η πύλη εισόδου.\nΣήμερα κλειστός χώρος ντους.",
+     "Demolition of 2 small balconies for fireplace wood.\nLeft side, at the back: shower with WC. Right: entrance gate.\nToday a closed shower room."),
     ("Neuer TerrassenAufbau.\nNeuer doppelter Dach-\nIsolierung.",
-     "Νέα κατασκευή της ταράτσας.\nΝέα διπλή μόνωση\nοροφής."),
+     "Νέα κατασκευή της ταράτσας.\nΝέα διπλή μόνωση\nοροφής.",
+     "New terrace structure.\nNew double roof\ninsulation."),
     ("Anfertigung von zwei BalkonSeitenwände zu den Nachbarn.",
-     "Κατασκευή δύο πλαϊνών τοίχων μπαλκονιού προς τους γείτονες."),
+     "Κατασκευή δύο πλαϊνών τοίχων μπαλκονιού προς τους γείτονες.",
+     "Making of two balcony side walls towards the neighbours."),
     ("Alte Küche mit einem kleinen Fenster.",
-     "Παλιά κουζίνα με ένα μικρό παράθυρο."),
+     "Παλιά κουζίνα με ένα μικρό παράθυρο.",
+     "Old kitchen with a small window."),
     ("Hinter der Küche und Duschraum kam eine kurze Treppe vom Nachbarhaus in m. Haus.\nAusgeräumt, umfunktioniert zu einem geschlossenen Putzschrank.",
-     "Πίσω από την κουζίνα και τον χώρο ντους υπήρχε μια κοντή σκάλα από το γειτονικό σπίτι προς το δικό μου.\nΑδειάστηκε και μετατράπηκε σε κλειστή ντουλάπα καθαριστικών."),
+     "Πίσω από την κουζίνα και τον χώρο ντους υπήρχε μια κοντή σκάλα από το γειτονικό σπίτι προς το δικό μου.\nΑδειάστηκε και μετατράπηκε σε κλειστή ντουλάπα καθαριστικών.",
+     "Behind the kitchen and shower room a short staircase led from the neighbouring house into my house.\nCleared out, converted into a closed cleaning cupboard."),
     ("Durch einen kleinen Durchgang mit 2 grossen Bollensteine gelangte man\nIn Chminéeraum= Wohnraum.",
-     "Μέσα από ένα μικρό πέρασμα με 2 μεγάλες πέτρες έφτανε κανείς\nστον χώρο του τζακιού = σαλόνι."),
+     "Μέσα από ένα μικρό πέρασμα με 2 μεγάλες πέτρες έφτανε κανείς\nστον χώρο του τζακιού = σαλόνι.",
+     "Through a small passage with 2 large boulders one reached\nthe fireplace room = living room."),
     ("Fenster zur zur hinteren Gasse.",
-     "Παράθυρο προς το πίσω σοκάκι."),
+     "Παράθυρο προς το πίσω σοκάκι.",
+     "Window onto the back alley."),
     ("Fenster im Wohnraum, Chminée, Sicht in einem Schacht zum Nachbar. Der mit grossen unvertigen grossen Haus.\nAnstelle vom Schacht wurde ein Kasten gebaut für Büroarbeiten.",
-     "Παράθυρο στο σαλόνι, τζάκι, θέα μέσα από ένα φρεάτιο προς τον γείτονα — αυτόν με το μεγάλο ημιτελές σπίτι.\nΣτη θέση του φρεατίου κατασκευάστηκε ένα ερμάριο για γραφειακή εργασία."),
+     "Παράθυρο στο σαλόνι, τζάκι, θέα μέσα από ένα φρεάτιο προς τον γείτονα — αυτόν με το μεγάλο ημιτελές σπίτι.\nΣτη θέση του φρεατίου κατασκευάστηκε ένα ερμάριο για γραφειακή εργασία.",
+     "Window in the living room, fireplace, a view through a shaft to the neighbour — the one with the big unfinished house.\nIn place of the shaft a cabinet was built for office work."),
     ("Aufstieg in 1. Stock.",
-     "Άνοδος στον 1ο όροφο."),
+     "Άνοδος στον 1ο όροφο.",
+     "Going up to the 1st floor."),
     ("Oberhalb der Treppe befindet sich ein AtrappenFenster. Auf passen beim Aufstieg.\n„Dunkelheit“. Böden wurden im ganzen erneuert.",
-     "Πάνω από τη σκάλα υπάρχει ένα ψεύτικο παράθυρο. Προσοχή κατά την άνοδο.\n«Σκοτάδι». Τα δάπεδα ανανεώθηκαν εξ ολοκλήρου."),
+     "Πάνω από τη σκάλα υπάρχει ένα ψεύτικο παράθυρο. Προσοχή κατά την άνοδο.\n«Σκοτάδι». Τα δάπεδα ανανεώθηκαν εξ ολοκλήρου.",
+     "Above the staircase there is a dummy window. Watch out when climbing.\n\"Darkness\". The floors were renewed throughout."),
     ("Fenster vom Wohnraum zur hinteren Strasse.",
-     "Παράθυρο του σαλονιού προς τον πίσω δρόμο."),
+     "Παράθυρο του σαλονιού προς τον πίσω δρόμο.",
+     "Window from the living room onto the back street."),
     ("Ende Jahr 1990 war es soweit.",
-     "Στα τέλη του 1990 ήρθε η στιγμή."),
+     "Στα τέλη του 1990 ήρθε η στιγμή.",
+     "At the end of 1990 the moment had come."),
     ("Jürg organisierte mir einen Übersetzer der mich zur Anwältin  mitnahm.",
-     "Ο Γιούργκ μου κανόνισε έναν μεταφραστή που με πήγε στη δικηγόρο."),
+     "Ο Γιούργκ μου κανόνισε έναν μεταφραστή που με πήγε στη δικηγόρο.",
+     "Jürg arranged a translator for me who took me along to the lawyer."),
     ("Beim Unterschreiben.  Somit hatte ich einen HausGötti.",
-     "Κατά την υπογραφή. Έτσι απέκτησα έναν «νονό του σπιτιού»."),
+     "Κατά την υπογραφή. Έτσι απέκτησα έναν «νονό του σπιτιού».",
+     "At the signing. And so I had a house godfather."),
     ("Beim Unterscheiben. Das Haus ist gekauft.",
-     "Κατά την υπογραφή. Το σπίτι αγοράστηκε."),
+     "Κατά την υπογραφή. Το σπίτι αγοράστηκε.",
+     "At the signing. The house is bought."),
     ("Hans erster Arbeitstag.",
-     "Η πρώτη εργάσιμη μέρα του Χανς."),
+     "Η πρώτη εργάσιμη μέρα του Χανς.",
+     "Hans's first working day."),
     ("Hans beim Vermessen",
-     "Ο Χανς κατά τη μέτρηση."),
+     "Ο Χανς κατά τη μέτρηση.",
+     "Hans taking measurements."),
     ("Hans macht erste Bekanntschaft mit Matina Notara.",
-     "Ο Χανς γνωρίζεται για πρώτη φορά με τη Ματίνα Νοταρά."),
+     "Ο Χανς γνωρίζεται για πρώτη φορά με τη Ματίνα Νοταρά.",
+     "Hans makes his first acquaintance with Matina Notara."),
     // 2026 update — Strassen-/Kanalisationsbau, Wohnzimmer, Hauseingang.
     ("Mein Sanitari mit Gehilfe.",
-     "Ο υδραυλικός μου με τον βοηθό του."),
+     "Ο υδραυλικός μου με τον βοηθό του.",
+     "My plumber with his helper."),
     ("Ich fange mit der Kanalisation am. Während mehreren Jahren wurde mir beigebracht, dass ich mich darum nicht zu kümmern hätte. Ich wäre mit meinem Abwasser von der Küche, Duschraum mit Toilette mit meinen Nachbarn re. + li. angeschlossen. Ich hab nicht auf. Denn ich musste von meiner neu gebauten Terrasse mit Neuerrichtung von Wasserleitung den Anschluss im Höfli finden.\nMeine Handwerker halfen mir dabei. Mitte Höfli fanden wir das Gesuchte. Riesige Pflanzenkübel verdeckten die Kanalisation.",
-     "Ξεκινώ με την αποχέτευση. Επί αρκετά χρόνια μου έλεγαν ότι δεν χρειαζόταν να ασχοληθώ μ' αυτό. Πως τα λύματά μου από την κουζίνα και τον χώρο ντους με την τουαλέτα ήταν συνδεδεμένα με τους γείτονές μου δεξιά + αριστερά. Δεν το έβαλα κάτω. Γιατί έπρεπε, από τη νεόχτιστη ταράτσα μου με τη νέα υδραυλική εγκατάσταση, να βρω τη σύνδεση στη μικρή αυλή.\nΟι τεχνίτες μου με βοήθησαν σ' αυτό. Στη μέση της αυλής βρήκαμε αυτό που ψάχναμε. Τεράστιες γλάστρες έκρυβαν την αποχέτευση."),
+     "Ξεκινώ με την αποχέτευση. Επί αρκετά χρόνια μου έλεγαν ότι δεν χρειαζόταν να ασχοληθώ μ' αυτό. Πως τα λύματά μου από την κουζίνα και τον χώρο ντους με την τουαλέτα ήταν συνδεδεμένα με τους γείτονές μου δεξιά + αριστερά. Δεν το έβαλα κάτω. Γιατί έπρεπε, από τη νεόχτιστη ταράτσα μου με τη νέα υδραυλική εγκατάσταση, να βρω τη σύνδεση στη μικρή αυλή.\nΟι τεχνίτες μου με βοήθησαν σ' αυτό. Στη μέση της αυλής βρήκαμε αυτό που ψάχναμε. Τεράστιες γλάστρες έκρυβαν την αποχέτευση.",
+     "I'm starting with the sewage system. For several years I was told there was no need for me to worry about it. That my waste water from the kitchen and the shower room with toilet was connected together with my neighbours' on the right + left. I did not give up. Because from my newly built terrace, with the new laying of the water pipe, I had to find the connection in the little courtyard.\nMy tradesmen helped me with it. In the middle of the little courtyard we found what we were after. Enormous plant tubs had hidden the sewer."),
     ("Material für den Strassenbau hinter meinem Wohnbereich.",
-     "Υλικά για την κατασκευή του δρόμου πίσω από τον χώρο κατοικίας μου."),
+     "Υλικά για την κατασκευή του δρόμου πίσω από τον χώρο κατοικίας μου.",
+     "Material for the road building behind my living area."),
     ("Dieser Strassenteil wird li. zum Nachbar und re. zu meinem Haus geöffnet.",
-     "Αυτό το τμήμα του δρόμου ανοίγεται αριστερά προς τον γείτονα και δεξιά προς το σπίτι μου."),
+     "Αυτό το τμήμα του δρόμου ανοίγεται αριστερά προς τον γείτονα και δεξιά προς το σπίτι μου.",
+     "This section of road is opened up on the left towards the neighbour and on the right towards my house."),
     ("Öffnung der Strasse.",
-     "Άνοιγμα του δρόμου."),
+     "Άνοιγμα του δρόμου.",
+     "Opening of the road."),
     ("Material wird verarbeitet.",
-     "Το υλικό επεξεργάζεται."),
+     "Το υλικό επεξεργάζεται.",
+     "The material is being worked."),
     ("Ebenso",
-     "Επίσης."),
+     "Επίσης.",
+     "Likewise."),
     ("Geteert danach betoniert.",
-     "Ασφαλτόστρωση, στη συνέχεια μπετόν."),
+     "Ασφαλτόστρωση, στη συνέχεια μπετόν.",
+     "Tarred, then concreted."),
     ("Betonierte Schuhe von Kosta",
-     "Τα τσιμεντωμένα παπούτσια του Κώστα."),
+     "Τα τσιμεντωμένα παπούτσια του Κώστα.",
+     "Kosta's concreted shoes."),
     ("Bis ins Detail perfekte Arbeit.",
-     "Τέλεια δουλειά μέχρι την τελευταία λεπτομέρεια."),
+     "Τέλεια δουλειά μέχρι την τελευταία λεπτομέρεια.",
+     "Work that is perfect down to the last detail."),
     ("Teerarbeiten.",
-     "Εργασίες ασφαλτόστρωσης."),
+     "Εργασίες ασφαλτόστρωσης.",
+     "Tarring work."),
     ("Perfekte Leistung .",
-     "Τέλεια απόδοση."),
+     "Τέλεια απόδοση.",
+     "Perfect workmanship."),
     ("Nach der Strasse Renovierung wurde das Wohnzimmer renoviert. Denn, nach starken Regenfällen blieb das Wasser an der Mauer liegen bis zur Verdampfung. Somit war der Wohnbereich immer feucht.",
-     "Μετά την ανακαίνιση του δρόμου ανακαινίστηκε το σαλόνι. Διότι, μετά από έντονες βροχοπτώσεις, το νερό έμενε στον τοίχο μέχρι να εξατμιστεί. Έτσι ο χώρος κατοικίας ήταν πάντα υγρός."),
+     "Μετά την ανακαίνιση του δρόμου ανακαινίστηκε το σαλόνι. Διότι, μετά από έντονες βροχοπτώσεις, το νερό έμενε στον τοίχο μέχρι να εξατμιστεί. Έτσι ο χώρος κατοικίας ήταν πάντα υγρός.",
+     "After the road renovation the living room was renovated. Because, after heavy rainfall, the water lay against the wall until it evaporated. So the living area was always damp."),
     ("Wohnzimmer mit Chminée.  Neu.",
-     "Σαλόνι με τζάκι. Καινούριο."),
+     "Σαλόνι με τζάκι. Καινούριο.",
+     "Living room with fireplace. New."),
     ("Vom Schreiner angefertigter Schrank unter die Wendeltreppe.",
-     "Ντουλάπι φτιαγμένο από τον ξυλουργό κάτω από τη σπειροειδή σκάλα."),
+     "Ντουλάπι φτιαγμένο από τον ξυλουργό κάτω από τη σπειροειδή σκάλα.",
+     "Cupboard made by the carpenter under the spiral staircase."),
     ("Wendeltreppe mit Geländer. Sämtliche Nischen im ganzen Haus neu. Alle Fenster und Läden mit Mückengitter ausstaffiert.",
-     "Σπειροειδής σκάλα με κάγκελα. Όλες οι εσοχές σε όλο το σπίτι καινούριες. Όλα τα παράθυρα και τα παντζούρια εξοπλισμένα με σήτες για κουνούπια."),
+     "Σπειροειδής σκάλα με κάγκελα. Όλες οι εσοχές σε όλο το σπίτι καινούριες. Όλα τα παράθυρα και τα παντζούρια εξοπλισμένα με σήτες για κουνούπια.",
+     "Spiral staircase with railing. All the niches throughout the house new. All windows and shutters fitted with mosquito screens."),
     ("Die Hauswand zum Hauseingang hatte eine Tiefe v. 45 cm. War mit Mörtel und Bollensteine gebaut.'",
-     "Ο τοίχος του σπιτιού προς την είσοδο είχε πάχος 45 εκ. Ήταν χτισμένος με κονίαμα και κροκάλες."),
+     "Ο τοίχος του σπιτιού προς την είσοδο είχε πάχος 45 εκ. Ήταν χτισμένος με κονίαμα και κροκάλες.",
+     "The house wall towards the entrance was 45 cm deep. It was built with mortar and boulders.'"),
     ("Sämtliche Hauskabel wurden in die Hauswand verlegt mit altem Elektrokasten.",
-     "Όλα τα καλώδια του σπιτιού τοποθετήθηκαν μέσα στον τοίχο, μαζί με το παλιό ηλεκτρικό κουτί."),
+     "Όλα τα καλώδια του σπιτιού τοποθετήθηκαν μέσα στον τοίχο, μαζί με το παλιό ηλεκτρικό κουτί.",
+     "All the house cables were laid into the house wall, together with the old electrical box."),
     ("Hauseingangwand",
-     "Τοίχος εισόδου του σπιτιού."),
+     "Τοίχος εισόδου του σπιτιού.",
+     "House entrance wall."),
     ("WC-Fenster und Elektrokasten.",
-     "Παράθυρο τουαλέτας και ηλεκτρικό κουτί."),
+     "Παράθυρο τουαλέτας και ηλεκτρικό κουτί.",
+     "Toilet window and electrical box."),
 ];
 
 fn translate(lang: Lang, s: &str) -> String {
@@ -234,9 +299,13 @@ fn translate(lang: Lang, s: &str) -> String {
         return s.to_string();
     }
     let key = s.trim();
-    for (de, el) in TR {
+    for (de, el, en) in TR {
         if *de == key {
-            return (*el).to_string();
+            return match lang {
+                Lang::El => (*el).to_string(),
+                Lang::En => (*en).to_string(),
+                Lang::De => unreachable!(),
+            };
         }
     }
     s.to_string() // fall through unchanged so nothing is silently lost
@@ -658,13 +727,15 @@ fn main() -> Result<()> {
                 langs = match v.as_str() {
                     "de" => vec![Lang::De],
                     "el" | "gr" => vec![Lang::El],
+                    "en" => vec![Lang::En],
                     "both" => vec![Lang::De, Lang::El],
-                    other => anyhow::bail!("unknown --lang {} (use de|el|both)", other),
+                    "all" => vec![Lang::De, Lang::El, Lang::En],
+                    other => anyhow::bail!("unknown --lang {} (use de|el|en|both|all)", other),
                 };
             }
             "--images-only" => images_only = true,
             "-h" | "--help" => {
-                println!("baugeschichte [--lang de|el|both] [--images-only]");
+                println!("baugeschichte [--lang de|el|en|both|all] [--images-only]");
                 return Ok(());
             }
             other => anyhow::bail!("unknown arg {}", other),

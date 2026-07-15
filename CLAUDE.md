@@ -16,7 +16,7 @@ cargo build --release
 cargo run --release --bin inspect_listing -- <url>
 cargo run --release --bin recent_listings -- [--area <id>] [--pages <n>] [--top <n>] [--sort latest|price-asc]
 cargo run --release --bin geoland_recent_listings -- [--area <id>] [--top <n>] [--sort latest|price-asc] [--sale-only|--rent-only]
-cargo run --release --bin baugeschichte -- [--lang de|el|both] [--images-only]
+cargo run --release --bin baugeschichte -- [--lang de|el|en|both|all] [--images-only]
 cargo run --release --bin wa_export -- [--import <dir>] [--since <epoch>] [--all] [--dry-run]
 ```
 
@@ -133,7 +133,9 @@ title-cases the last URL segment. So `r3235 → "sale-akiniton/ermioni" →
 Unrelated to listing scraping: turns the WhatsApp messages Erica Baumann sent
 about buying and rebuilding her house in Ermioni (synced into
 `erica-house/messages.json` by the pegelstand WhatsApp toolchain) into a titled
-photo book — German (`baugeschichte.pdf`) and Greek (`baugeschichte_gr.pdf`).
+photo book — German (`baugeschichte.pdf`), Greek (`baugeschichte_gr.pdf`) and
+English (`baugeschichte_en.pdf`). `--lang` takes `de` / `el` / `en` for one
+edition, `both` (= DE + EL, the default) or `all` (= DE + EL + EN).
 `--images-only` instead renders `baugeschichte_bilder.pdf`: the cover (with
 the two clickable Maps/listing links; cover language = first `--lang` value,
 German by default) followed by photos only, one per page — no labels, captions
@@ -154,10 +156,10 @@ Pipeline:
    note). genpdf can neither split an image nor keep a group together, so a tall
    portrait photo starting mid-page would overflow the bottom edge — giving each
    plate its own page is the fix.
-4. Greek output: a static `TR` map (German-trimmed → Greek) translates the
-   cover, intro, every caption and the closing note. Unmapped text falls through
-   unchanged so nothing is silently dropped. The `Lang` enum carries all the
-   static UI strings.
+4. Greek + English output: a static `TR` table of `(German-trimmed, Greek,
+   English)` triples translates the cover, intro, every caption and the closing
+   note. Unmapped text falls through unchanged so nothing is silently dropped.
+   The `Lang` enum carries all the static UI strings.
 5. Clickable cover links (`add_cover_links`): genpdf 0.2 can't emit hyperlinks,
    so after `render_to_file` the PDF is reopened with `lopdf` and `/Link` URI
    annotations are overlaid on the Maps + goutos URL lines. The two URL lines
@@ -184,11 +186,12 @@ Non-obvious gotchas:
   printable box (cap on the more constraining dimension), so genpdf scales it
   down to the page rather than rendering at native size.
 
-- **Greek edition completeness.** Every new caption/note added to
-  `messages.json` must get a `TR` entry in `baugeschichte.rs`, keyed by the
-  EXACT trimmed German text (preserve quirks: double spaces, trailing `'`,
-  embedded `\n`). Untranslated text falls through as German inside the Greek
-  PDF — silent but wrong. After a sync, translate the new strings and add them.
+- **Greek + English edition completeness.** Every new caption/note added to
+  `messages.json` must get a `TR` row in `baugeschichte.rs` — a
+  `(German, Greek, English)` triple keyed by the EXACT trimmed German text
+  (preserve quirks: double spaces, trailing `'`, embedded `\n`). Untranslated
+  text falls through as German inside the Greek/English PDF — silent but wrong.
+  After a sync, translate the new strings into BOTH columns and add them.
 
 ### `src/wa_export.rs` — WhatsApp chat-export parser (pure Rust)
 
